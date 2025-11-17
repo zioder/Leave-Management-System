@@ -162,13 +162,19 @@ The JSON must contain: action, employee_id, and parameters."""
                 },
             }
 
-    def narrative(self, command: Dict[str, Any], data_payload: Dict[str, Any]) -> str:
+    def narrative(self, command: Dict[str, Any], data_payload: Dict[str, Any], is_admin: bool = False) -> str:
         """
         Generate a human-readable narrative for the user.
         """
         prompt = narrative_prompt(command, data_payload)
 
-        system_prompt = """You are a helpful assistant for a leave management system.
+        if is_admin:
+            system_prompt = """You are a professional assistant for a leave management system admin interface.
+Generate clear, objective, and impersonal responses about employee leave data and team statistics.
+Use third-person language (e.g., "The employee has..." not "You have...").
+Keep responses brief, factual, and professional. Do not use personal greetings or names."""
+        else:
+            system_prompt = """You are a helpful assistant for a leave management system.
 Generate clear, concise, and friendly responses to users about their leave requests and balances.
 Keep responses professional but conversational. Be brief and to the point."""
 

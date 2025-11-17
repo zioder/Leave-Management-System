@@ -316,22 +316,25 @@ def handle_user_message(message: str, employee_id: str | None = None, is_admin: 
     
     # Generate narrative with fallback
     try:
-        narrative = llm.narrative(command, narrative_data)
+        # Pass is_admin flag to narrative for proper tone
+        narrative = llm.narrative(command, narrative_data, is_admin=is_admin)
         
         # If narrative is the generic error message, create a simple fallback
         if "trouble generating a response" in narrative:
-            narrative = generate_simple_narrative(action, data)
+            narrative = generate_simple_narrative(action, data, is_admin=is_admin)
     except Exception:
-        narrative = generate_simple_narrative(action, data)
+        narrative = generate_simple_narrative(action, data, is_admin=is_admin)
     
     return {"command": command, "data": data, "message": narrative}
 
 
-def generate_simple_narrative(action: str, data: Dict[str, Any]) -> str:
+def generate_simple_narrative(action: str, data: Dict[str, Any], is_admin: bool = False) -> str:
     """Generate a simple text narrative when Gemini fails."""
     if action == "query_balance":
         avail = data.get("available_days", 0)
         taken = data.get("taken_ytd", 0)
+        if is_admin:
+            return f"Employee has {avail} leave days available. {taken} days taken year-to-date."
         return f"You have {avail} leave days available. You've taken {taken} days so far this year."
     
     elif action == "get_availability_stats":

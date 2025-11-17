@@ -37,7 +37,7 @@ function UserSelector({ isAdmin, onModeChange, employees, selectedEmployee, onEm
             <option value="">-- Select an employee --</option>
             {employees.map(emp => (
               <option key={emp.id} value={emp.id}>
-                {emp.name} ({emp.status})
+                {emp.name} - {emp.department}
               </option>
             ))}
           </select>
