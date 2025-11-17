@@ -13,7 +13,10 @@ from typing import Dict
 
 def command_prompt(user_message: str) -> str:
     """Return a prompt instructing the model to emit JSON only."""
+    from datetime import datetime
+    
     is_admin = "[ADMIN_MODE]" in user_message.upper()
+    today = datetime.now().strftime("%Y-%m-%d")
     
     if is_admin:
         actions = '"query_balance" | "request_leave" | "list_requests" | "get_all_employees" | "get_availability_stats"'
@@ -44,12 +47,23 @@ def command_prompt(user_message: str) -> str:
         - get_all_employees: Get all employees with their status (admin only)
         - get_availability_stats: Get availability statistics (admin only)
 
+        Date handling:
+        - Convert relative dates to ISO 8601 (YYYY-MM-DD)
+        - "tomorrow" = today + 1 day
+        - "next Monday" = calculate next Monday's date
+        - "from tomorrow for 2 days" = tomorrow as start_date, tomorrow+1 as end_date
+        - "2 days from tomorrow" = tomorrow as start_date, tomorrow+1 as end_date
+        - "2 days starting tomorrow" = tomorrow as start_date, tomorrow+1 as end_date
+        - If only days mentioned (e.g., "5 days"), use "days": 5, omit dates
+        - Always calculate actual dates when possible
+
         Constraints:
         - There are 30 engineers total; at least 20 must remain available.
         - Reject impossible requests by setting "action": "error" with explanation.
         - Dates must be ISO 8601 format (YYYY-MM-DD).
         - Omit optional parameters when not provided.{admin_note}
         - Extract employee_id from the message if present, otherwise use the one from context.
+        - Today's date is: {today} - use this for calculating relative dates like "tomorrow"
         - Employee IDs are in format "firstname-lastname" (e.g., "adam-solomon").
         - When user mentions just a first name (e.g., "Adam"), extract it as employee_id: "adam" (lowercase).
         - The backend will resolve partial names to full employee IDs.
