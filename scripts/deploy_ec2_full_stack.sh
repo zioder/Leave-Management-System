@@ -137,20 +137,70 @@ else
         exit 1
     fi
     
-    cd frontend
+    # Find a location with available space for building
+    # Check /tmp first (usually has more space), then /home
+    BUILD_DIR=""
+    TMP_SPACE=$(df -BM /tmp 2>/dev/null | tail -1 | awk '{print $4}' | sed 's/M//' || echo "0")
+    HOME_SPACE=$(df -BM /home 2>/dev/null | tail -1 | awk '{print $4}' | sed 's/M//' || echo "0")
     
-    # Check available disk space
-    AVAILABLE_SPACE=$(df -BG . | tail -1 | awk '{print $4}' | sed 's/G//')
-    if [ "$AVAILABLE_SPACE" -lt 1 ]; then
-        echo -e "${RED}❌ Error: Less than 1GB disk space available${NC}"
-        echo -e "${YELLOW}Please free up space or build locally${NC}"
+    if [ "$TMP_SPACE" -gt 2048 ]; then
+        BUILD_DIR="/tmp/leave-mgmt-build-$$"
+        echo -e "${BLUE}💾 Using /tmp for build (${TMP_SPACE}MB available)${NC}"
+    elif [ "$HOME_SPACE" -gt 2048 ]; then
+        BUILD_DIR="/home/leave-mgmt-build-$$"
+        echo -e "${BLUE}💾 Using /home for build (${HOME_SPACE}MB available)${NC}"
+    else
+        echo -e "${RED}❌ Error: Insufficient disk space in /tmp (${TMP_SPACE}MB) and /home (${HOME_SPACE}MB)${NC}"
+        echo -e "${YELLOW}📋 Please build locally instead:${NC}"
         echo ""
-        echo "To free up space, run:"
-        echo "  npm cache clean --force"
-        echo "  rm -rf ~/.npm"
-        echo "  rm -rf node_modules"
+        echo "1. On your local machine, run:"
+        echo "   cd frontend"
+        echo "   echo 'REACT_APP_API_URL=' > .env"
+        echo "   npm install"
+        echo "   npm run build"
+        echo ""
+        echo "2. Upload to S3:"
+        echo "   aws s3 sync frontend/build/ s3://${LEAVE_MGMT_S3_BUCKET}/app/frontend/ --region $REGION"
+        echo ""
+        echo "3. Then re-run this script - it will skip the build step"
         exit 1
     fi
+    
+    # Create build directory and copy frontend source
+    echo -e "${BLUE}📁 Setting up build directory at ${BUILD_DIR}...${NC}"
+    mkdir -p "$BUILD_DIR"
+    cp -r frontend/* "$BUILD_DIR/"
+    cd "$BUILD_DIR"
+    
+    # Configure npm to use the build directory's filesystem for cache and temp
+    export npm_config_cache="$BUILD_DIR/.npm-cache"
+    export TMPDIR="$BUILD_DIR/.tmp"
+    mkdir -p "$npm_config_cache" "$TMPDIR"
+    
+    # Function to check and clean up disk space
+    cleanup_disk_space() {
+        echo -e "${YELLOW}🧹 Cleaning up disk space...${NC}"
+        npm cache clean --force 2>/dev/null || true
+        rm -rf "$BUILD_DIR/.npm-cache" 2>/dev/null || true
+        rm -rf "$BUILD_DIR/.tmp" 2>/dev/null || true
+        rm -rf "$BUILD_DIR/node_modules" 2>/dev/null || true
+        # Clean up any partial node_modules
+        if [ -d "node_modules" ] && [ ! -f "node_modules/.bin/react-scripts" ]; then
+            echo -e "${YELLOW}Removing incomplete node_modules...${NC}"
+            rm -rf node_modules
+        fi
+    }
+    
+    # Function to check disk space (returns available space in MB)
+    check_disk_space() {
+        df -BM . | tail -1 | awk '{print $4}' | sed 's/M//'
+    }
+    
+    # Check available disk space (need at least 2GB for npm install)
+    AVAILABLE_SPACE_MB=$(check_disk_space)
+    AVAILABLE_SPACE_GB=$((AVAILABLE_SPACE_MB / 1024))
+    
+    echo -e "${BLUE}💾 Available disk space: ${AVAILABLE_SPACE_GB}GB (${AVAILABLE_SPACE_MB}MB)${NC}"
     
     # Install dependencies (need dev dependencies for build)
     echo -e "${BLUE}📥 Installing npm dependencies...${NC}"
@@ -170,16 +220,63 @@ else
     fi
     
     if [ "$NEED_INSTALL" = true ]; then
-        # Try npm install, if it fails, clear cache and retry
-        if ! npm install 2>&1 | tee /tmp/npm-install.log; then
-            echo -e "${YELLOW}⚠️  npm install failed, clearing cache and retrying...${NC}"
-            npm cache clean --force
-            rm -rf node_modules package-lock.json
-            if ! npm install; then
-                echo -e "${RED}❌ Error: npm install failed after cache clear${NC}"
-                echo "This is likely due to insufficient disk space in CloudShell"
-                echo "Please build locally and upload to S3 manually"
-                exit 1
+        # Try npm install, if it fails, check for ENOSPC and clean up
+        if ! npm install 2>&1 | tee "$BUILD_DIR/npm-install.log"; then
+            # Check if error is ENOSPC (no space left)
+            if grep -q "ENOSPC\|no space left\|nospc" "$BUILD_DIR/npm-install.log"; then
+                echo -e "${RED}❌ Error: No space left on device${NC}"
+                echo -e "${YELLOW}🧹 Attempting to free up space...${NC}"
+                cleanup_disk_space
+                
+                # Check space again
+                AVAILABLE_SPACE_MB=$(check_disk_space)
+                if [ "$AVAILABLE_SPACE_MB" -lt 2048 ]; then
+                    echo -e "${RED}❌ Error: Still insufficient disk space after cleanup${NC}"
+                    echo ""
+                    echo -e "${YELLOW}📋 Please build locally instead:${NC}"
+                    echo ""
+                    echo "1. On your local machine, run:"
+                    echo "   cd frontend"
+                    echo "   echo 'REACT_APP_API_URL=' > .env"
+                    echo "   npm install"
+                    echo "   npm run build"
+                    echo ""
+                    echo "2. Upload to S3:"
+                    echo "   aws s3 sync frontend/build/ s3://${LEAVE_MGMT_S3_BUCKET}/app/frontend/ --region $REGION"
+                    echo ""
+                    echo "3. Then re-run this script - it will skip the build step"
+                    # Cleanup before exit
+                    cd "$PROJECT_ROOT"
+                    rm -rf "$BUILD_DIR"
+                    exit 1
+                fi
+                
+                echo -e "${YELLOW}⚠️  Retrying npm install after cleanup...${NC}"
+                rm -rf node_modules package-lock.json
+                if ! npm install; then
+                    echo -e "${RED}❌ Error: npm install failed after cleanup${NC}"
+                    echo "This is likely due to insufficient disk space in CloudShell"
+                    echo ""
+                    echo -e "${YELLOW}📋 Please build locally and upload to S3 manually${NC}"
+                    # Cleanup before exit
+                    cd "$PROJECT_ROOT"
+                    rm -rf "$BUILD_DIR"
+                    exit 1
+                fi
+            else
+                echo -e "${YELLOW}⚠️  npm install failed, clearing cache and retrying...${NC}"
+                cleanup_disk_space
+                rm -rf node_modules package-lock.json
+                if ! npm install; then
+                    echo -e "${RED}❌ Error: npm install failed after cache clear${NC}"
+                    echo "This is likely due to insufficient disk space in CloudShell"
+                    echo ""
+                    echo -e "${YELLOW}📋 Please build locally and upload to S3 manually${NC}"
+                    # Cleanup before exit
+                    cd "$PROJECT_ROOT"
+                    rm -rf "$BUILD_DIR"
+                    exit 1
+                fi
             fi
         fi
         echo -e "${GREEN}✅ Dependencies installed successfully${NC}"
@@ -187,8 +284,25 @@ else
         # Verify react-scripts is now available
         if [ ! -f "node_modules/.bin/react-scripts" ]; then
             echo -e "${RED}❌ Error: react-scripts not found after installation${NC}"
+            # Check if we have space before trying to install react-scripts
+            AVAILABLE_SPACE_MB=$(check_disk_space)
+            if [ "$AVAILABLE_SPACE_MB" -lt 500 ]; then
+                echo -e "${RED}❌ Insufficient space to install react-scripts${NC}"
+                echo -e "${YELLOW}📋 Please build locally and upload to S3 manually${NC}"
+                # Cleanup before exit
+                cd "$PROJECT_ROOT"
+                rm -rf "$BUILD_DIR"
+                exit 1
+            fi
             echo "Attempting to install react-scripts directly..."
-            npm install react-scripts --save
+            if ! npm install react-scripts --save; then
+                echo -e "${RED}❌ Error: Failed to install react-scripts${NC}"
+                echo -e "${YELLOW}📋 Please build locally and upload to S3 manually${NC}"
+                # Cleanup before exit
+                cd "$PROJECT_ROOT"
+                rm -rf "$BUILD_DIR"
+                exit 1
+            fi
         fi
     fi
     
@@ -197,13 +311,71 @@ else
     echo -e "${BLUE}🔨 Building React application...${NC}"
     echo "REACT_APP_API_URL=" > .env
     
-    if ! npm run build; then
+    if ! npm run build 2>&1 | tee "$BUILD_DIR/npm-build.log"; then
         echo -e "${RED}❌ Error: npm run build failed${NC}"
+        
+        # Check if error is ENOSPC (no space left)
+        if grep -q "ENOSPC\|no space left\|nospc" "$BUILD_DIR/npm-build.log"; then
+            echo -e "${RED}❌ Error: No space left on device during build${NC}"
+            echo ""
+            echo -e "${YELLOW}📋 Please build locally instead:${NC}"
+            echo ""
+            echo "1. On your local machine, run:"
+            echo "   cd frontend"
+            echo "   echo 'REACT_APP_API_URL=' > .env"
+            echo "   npm install"
+            echo "   npm run build"
+            echo ""
+            echo "2. Upload to S3:"
+            echo "   aws s3 sync frontend/build/ s3://${LEAVE_MGMT_S3_BUCKET}/app/frontend/ --region $REGION"
+            echo ""
+            echo "3. Then re-run this script - it will skip the build step"
+            # Cleanup before exit
+            cd "$PROJECT_ROOT"
+            rm -rf "$BUILD_DIR"
+            exit 1
+        fi
+        
+        # Check available space before attempting reinstall
+        AVAILABLE_SPACE_MB=$(check_disk_space)
+        if [ "$AVAILABLE_SPACE_MB" -lt 2048 ]; then
+            echo -e "${RED}❌ Insufficient disk space to retry build${NC}"
+            echo ""
+            echo -e "${YELLOW}📋 Please build locally instead:${NC}"
+            echo ""
+            echo "1. On your local machine, run:"
+            echo "   cd frontend"
+            echo "   echo 'REACT_APP_API_URL=' > .env"
+            echo "   npm install"
+            echo "   npm run build"
+            echo ""
+            echo "2. Upload to S3:"
+            echo "   aws s3 sync frontend/build/ s3://${LEAVE_MGMT_S3_BUCKET}/app/frontend/ --region $REGION"
+            echo ""
+            echo "3. Then re-run this script - it will skip the build step"
+            # Cleanup before exit
+            cd "$PROJECT_ROOT"
+            rm -rf "$BUILD_DIR"
+            exit 1
+        fi
+        
         echo -e "${YELLOW}Attempting to fix by reinstalling dependencies...${NC}"
+        cleanup_disk_space
         rm -rf node_modules package-lock.json
-        npm install
+        if ! npm install; then
+            echo -e "${RED}❌ Error: npm install failed during retry${NC}"
+            echo -e "${YELLOW}📋 Please build locally and upload to S3 manually${NC}"
+            # Cleanup before exit
+            cd "$PROJECT_ROOT"
+            rm -rf "$BUILD_DIR"
+            exit 1
+        fi
         if ! npm run build; then
             echo -e "${RED}❌ Error: npm run build failed after reinstall${NC}"
+            echo -e "${YELLOW}📋 Please build locally and upload to S3 manually${NC}"
+            # Cleanup before exit
+            cd "$PROJECT_ROOT"
+            rm -rf "$BUILD_DIR"
             exit 1
         fi
     fi
@@ -211,6 +383,9 @@ else
     # Check if build was successful
     if [ ! -d "build" ] || [ ! -f "build/index.html" ]; then
         echo -e "${RED}❌ Error: Build directory or index.html not found${NC}"
+        # Cleanup before exit
+        cd "$PROJECT_ROOT"
+        rm -rf "$BUILD_DIR"
         exit 1
     fi
     
@@ -220,11 +395,19 @@ else
     echo -e "${BLUE}📤 Uploading to S3...${NC}"
     if ! aws s3 sync build/ s3://${LEAVE_MGMT_S3_BUCKET}/app/frontend/ --region $REGION; then
         echo -e "${RED}❌ Error: Failed to upload to S3${NC}"
+        # Cleanup before exit
+        cd "$PROJECT_ROOT"
+        rm -rf "$BUILD_DIR"
         exit 1
     fi
     
     echo -e "${GREEN}✅ Frontend uploaded to S3${NC}"
-    cd ..
+    
+    # Cleanup build directory
+    echo -e "${BLUE}🧹 Cleaning up build directory...${NC}"
+    cd "$PROJECT_ROOT"
+    rm -rf "$BUILD_DIR"
+    echo -e "${GREEN}✅ Cleanup complete${NC}"
 fi
 
 # Create user data script
