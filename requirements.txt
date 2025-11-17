@@ -1,0 +1,9 @@
+boto3>=1.34.0
+pandas>=2.2.0
+kafka-python>=2.0.2
+python-dotenv>=1.0.0
+openpyxl>=3.1.0
+
+# Gemini (Google AI Studio) client
+google-genai>=1.0.0
+

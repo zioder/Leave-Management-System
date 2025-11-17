@@ -1,0 +1,301 @@
+employee_id,department,position,annual_allowance,carried_over,taken_to_date,remaining_leaves,status,updated_at
+adam-solomon,HR,HR Manager,27,7,6,14,ACTIVE,2025-11-17T12:53:54.292574
+alan-hamilton,Operations,Logistics Coordinator,24,8,9,7,ACTIVE,2025-11-17T12:53:54.292574
+alexander-hahn,IT,System Administrator,22,8,14,0,NO_BALANCE,2025-11-17T12:53:54.292574
+alexandra-campbell,IT,System Administrator,20,6,1,13,ACTIVE,2025-11-17T12:53:54.292574
+alexandra-pitts,Marketing,Marketing Specialist,28,10,2,16,ACTIVE,2025-11-17T12:53:54.292574
+allison-evans,IT,Software Engineer,25,4,10,11,ACTIVE,2025-11-17T12:53:54.292574
+allison-richard,HR,HR Manager,24,1,7,16,ACTIVE,2025-11-17T12:53:54.292574
+alyssa-adams,Operations,Logistics Coordinator,28,1,7,20,ACTIVE,2025-11-17T12:53:54.292574
+amanda-mcdonald,Marketing,Marketing Specialist,25,8,9,8,ACTIVE,2025-11-17T12:53:54.292574
+amanda-thompson,HR,Recruiter,27,7,13,7,ACTIVE,2025-11-17T12:53:54.292574
+amber-snyder,Finance,Accountant,23,2,0,21,ACTIVE,2025-11-17T12:53:54.292574
+amy-gaines,HR,HR Manager,22,6,6,10,ACTIVE,2025-11-17T12:53:54.292574
+andrew-bolton,Operations,Operations Manager,30,5,10,15,ACTIVE,2025-11-17T12:53:54.292574
+andrew-cole,Finance,Financial Analyst,26,3,0,23,ACTIVE,2025-11-17T12:53:54.292574
+andrew-jones,IT,Software Engineer,30,4,3,23,ACTIVE,2025-11-17T12:53:54.292574
+andrew-mendez,Finance,Financial Analyst,22,9,1,12,ACTIVE,2025-11-17T12:53:54.292574
+andrew-smith,Operations,Operations Manager,29,1,3,25,ACTIVE,2025-11-17T12:53:54.292574
+angel-goodman,HR,Recruiter,23,10,2,11,ACTIVE,2025-11-17T12:53:54.292574
+angela-morris,Finance,Financial Analyst,28,1,27,0,NO_BALANCE,2025-11-17T12:53:54.292574
+anna-acosta,Operations,Operations Manager,29,1,6,22,ACTIVE,2025-11-17T12:53:54.292574
+annette-coleman,HR,Recruiter,28,7,4,17,ACTIVE,2025-11-17T12:53:54.292574
+anthony-johnson,IT,System Administrator,22,6,8,8,ACTIVE,2025-11-17T12:53:54.292574
+anthony-walker,Marketing,Marketing Specialist,24,3,6,15,ACTIVE,2025-11-17T12:53:54.292574
+antonio-welch,Marketing,SEO Analyst,24,8,10,6,ACTIVE,2025-11-17T12:53:54.292574
+april-fields,HR,Recruiter,28,7,7,14,ACTIVE,2025-11-17T12:53:54.292574
+arthur-smith,Marketing,Marketing Specialist,22,8,10,4,ACTIVE,2025-11-17T12:53:54.292574
+ashley-brewer,IT,Software Engineer,29,2,18,9,ACTIVE,2025-11-17T12:53:54.292574
+ashley-humphrey,IT,Software Engineer,29,4,9,16,ACTIVE,2025-11-17T12:53:54.292574
+ashley-norton,Marketing,SEO Analyst,28,2,19,7,ACTIVE,2025-11-17T12:53:54.292574
+ashley-rogers,Finance,Accountant,23,4,17,2,ACTIVE,2025-11-17T12:53:54.292574
+benjamin-wood,HR,HR Manager,24,8,2,14,ACTIVE,2025-11-17T12:53:54.292574
+beth-taylor,Marketing,Marketing Specialist,22,4,9,9,ACTIVE,2025-11-17T12:53:54.292574
+bethany-thompson,Finance,Financial Analyst,20,10,1,9,ACTIVE,2025-11-17T12:53:54.292574
+bill-johnson,Finance,Financial Analyst,26,6,4,16,ACTIVE,2025-11-17T12:53:54.292574
+billy-duran,Finance,Accountant,26,7,2,17,ACTIVE,2025-11-17T12:53:54.292574
+brandon-price,Finance,Accountant,20,10,10,0,NO_BALANCE,2025-11-17T12:53:54.292574
+brenda-wilson,HR,HR Manager,28,7,17,4,ACTIVE,2025-11-17T12:53:54.292574
+brett-dickerson,HR,Recruiter,26,1,15,10,ACTIVE,2025-11-17T12:53:54.292574
+brett-knox,Operations,Operations Manager,27,8,5,14,ACTIVE,2025-11-17T12:53:54.292574
+brooke-hudson,Marketing,Marketing Specialist,25,3,4,18,ACTIVE,2025-11-17T12:53:54.292574
+caleb-terrell,IT,System Administrator,20,8,7,5,ACTIVE,2025-11-17T12:53:54.292574
+carlos-moore,HR,HR Manager,21,5,9,7,ACTIVE,2025-11-17T12:53:54.292574
+carly-wilson,Finance,Financial Analyst,22,2,10,10,ACTIVE,2025-11-17T12:53:54.292574
+carolyn-adams,Marketing,SEO Analyst,22,5,0,17,ACTIVE,2025-11-17T12:53:54.292574
+carrie-anderson,Operations,Operations Manager,23,10,6,7,ACTIVE,2025-11-17T12:53:54.292574
+charles-buchanan,IT,System Administrator,26,5,16,5,ACTIVE,2025-11-17T12:53:54.292574
+charles-harris,HR,HR Manager,30,2,8,20,ACTIVE,2025-11-17T12:53:54.292574
+charles-sanchez,IT,Software Engineer,25,4,0,21,ACTIVE,2025-11-17T12:53:54.292574
+chase-golden,HR,HR Manager,26,9,0,17,ACTIVE,2025-11-17T12:53:54.292574
+christina-moran,HR,HR Manager,21,5,6,10,ACTIVE,2025-11-17T12:53:54.292574
+christopher-frank,HR,HR Manager,28,4,15,9,ACTIVE,2025-11-17T12:53:54.292574
+christopher-henderson,IT,System Administrator,27,4,9,14,ACTIVE,2025-11-17T12:53:54.292574
+christopher-ross,IT,System Administrator,25,6,6,13,ACTIVE,2025-11-17T12:53:54.292574
+corey-chung,Finance,Financial Analyst,21,6,6,9,ACTIVE,2025-11-17T12:53:54.292574
+corey-richmond,Operations,Logistics Coordinator,29,5,17,7,ACTIVE,2025-11-17T12:53:54.292574
+crystal-wilson,Marketing,Marketing Specialist,20,8,5,7,ACTIVE,2025-11-17T12:53:54.292574
+cynthia-strickland,HR,Recruiter,28,5,11,12,ACTIVE,2025-11-17T12:53:54.292574
+cynthia-thompson,IT,System Administrator,25,9,15,1,ACTIVE,2025-11-17T12:53:54.292574
+dalton-barber,Operations,Logistics Coordinator,22,8,13,1,ACTIVE,2025-11-17T12:53:54.292574
+daniel-gomez,HR,Recruiter,24,3,18,3,ACTIVE,2025-11-17T12:53:54.292574
+daniel-reed,Marketing,SEO Analyst,21,1,0,20,ACTIVE,2025-11-17T12:53:54.292574
+daniel-sanchez,Operations,Logistics Coordinator,23,2,2,19,ACTIVE,2025-11-17T12:53:54.292574
+daniel-schmidt,Finance,Financial Analyst,30,9,15,6,ACTIVE,2025-11-17T12:53:54.292574
+danielle-george,Operations,Operations Manager,23,6,5,12,ACTIVE,2025-11-17T12:53:54.292574
+danielle-hamilton,Finance,Accountant,27,2,18,7,ACTIVE,2025-11-17T12:53:54.292574
+danielle-watkins,Marketing,Marketing Specialist,22,8,6,8,ACTIVE,2025-11-17T12:53:54.292574
+david-gonzalez,Operations,Operations Manager,29,9,8,12,ACTIVE,2025-11-17T12:53:54.292574
+david-richard,HR,HR Manager,22,9,1,12,ACTIVE,2025-11-17T12:53:54.292574
+david-strong-dvm,Finance,Financial Analyst,26,8,10,8,ACTIVE,2025-11-17T12:53:54.292574
+dawn-carey,Operations,Operations Manager,22,2,12,8,ACTIVE,2025-11-17T12:53:54.292574
+deanna-huang,Operations,Logistics Coordinator,21,6,2,13,ACTIVE,2025-11-17T12:53:54.292574
+denise-collins,IT,Software Engineer,30,10,2,18,ACTIVE,2025-11-17T12:53:54.292574
+diana-massey,Marketing,Marketing Specialist,23,5,10,8,ACTIVE,2025-11-17T12:53:54.292574
+donna-bowers,Finance,Financial Analyst,20,7,0,13,ACTIVE,2025-11-17T12:53:54.292574
+donna-thompson,Finance,Financial Analyst,20,6,5,9,ACTIVE,2025-11-17T12:53:54.292574
+donna-walsh,Finance,Accountant,22,7,3,12,ACTIVE,2025-11-17T12:53:54.292574
+donna-wells,Operations,Logistics Coordinator,30,5,15,10,ACTIVE,2025-11-17T12:53:54.292574
+doris-haney,HR,HR Manager,24,2,15,7,ACTIVE,2025-11-17T12:53:54.292574
+douglas-barber,HR,HR Manager,21,3,10,8,ACTIVE,2025-11-17T12:53:54.292574
+dr-jacqueline-cooper,IT,Software Engineer,23,4,13,6,ACTIVE,2025-11-17T12:53:54.292574
+dr-lisa-hamilton-md,Operations,Operations Manager,20,5,9,6,ACTIVE,2025-11-17T12:53:54.292574
+dustin-hensley,Marketing,SEO Analyst,22,6,13,3,ACTIVE,2025-11-17T12:53:54.292574
+edward-bishop,Marketing,Marketing Specialist,29,6,1,22,ACTIVE,2025-11-17T12:53:54.292574
+edward-morrison,HR,HR Manager,26,3,17,6,ACTIVE,2025-11-17T12:53:54.292574
+elizabeth-cook,Finance,Accountant,29,8,15,6,ACTIVE,2025-11-17T12:53:54.292574
+elizabeth-espinoza,Finance,Accountant,30,3,25,2,ACTIVE,2025-11-17T12:53:54.292574
+elizabeth-hebert,HR,Recruiter,29,3,16,10,ACTIVE,2025-11-17T12:53:54.292574
+elizabeth-hughes,Operations,Operations Manager,20,4,8,8,ACTIVE,2025-11-17T12:53:54.292574
+elizabeth-johnson,Marketing,SEO Analyst,21,10,11,0,NO_BALANCE,2025-11-17T12:53:54.292574
+elizabeth-sullivan,HR,HR Manager,27,9,8,10,ACTIVE,2025-11-17T12:53:54.292574
+eric-bates,Operations,Logistics Coordinator,25,8,15,2,ACTIVE,2025-11-17T12:53:54.292574
+erik-morris,HR,Recruiter,26,2,24,0,NO_BALANCE,2025-11-17T12:53:54.292574
+erik-pierce,Finance,Financial Analyst,21,5,15,1,ACTIVE,2025-11-17T12:53:54.292574
+erin-quinn,IT,Software Engineer,25,1,1,23,ACTIVE,2025-11-17T12:53:54.292574
+erin-sellers,IT,Software Engineer,21,1,4,16,ACTIVE,2025-11-17T12:53:54.292574
+francisco-hamilton,Marketing,SEO Analyst,21,9,5,7,ACTIVE,2025-11-17T12:53:54.292574
+gavin-johnson,Finance,Accountant,27,7,1,19,ACTIVE,2025-11-17T12:53:54.292574
+gerald-hoffman,HR,Recruiter,26,10,5,11,ACTIVE,2025-11-17T12:53:54.292574
+haley-holmes,Finance,Accountant,21,6,11,4,ACTIVE,2025-11-17T12:53:54.292574
+heather-berry,Operations,Logistics Coordinator,28,3,11,14,ACTIVE,2025-11-17T12:53:54.292574
+heather-martin,IT,Software Engineer,30,4,6,20,ACTIVE,2025-11-17T12:53:54.292574
+henry-beck,Marketing,SEO Analyst,20,5,3,12,ACTIVE,2025-11-17T12:53:54.292574
+holly-parsons,IT,Software Engineer,25,8,16,1,ACTIVE,2025-11-17T12:53:54.292574
+holly-ward,Operations,Logistics Coordinator,23,6,17,0,NO_BALANCE,2025-11-17T12:53:54.292574
+ivan-robertson,IT,System Administrator,26,1,11,14,ACTIVE,2025-11-17T12:53:54.292574
+jacob-gomez,Marketing,SEO Analyst,26,10,3,13,ACTIVE,2025-11-17T12:53:54.292574
+jacob-townsend,HR,HR Manager,27,2,16,9,ACTIVE,2025-11-17T12:53:54.292574
+james-byrd,IT,System Administrator,27,7,11,9,ACTIVE,2025-11-17T12:53:54.292574
+james-oliver,Finance,Financial Analyst,29,6,13,10,ACTIVE,2025-11-17T12:53:54.292574
+james-sanchez,HR,HR Manager,27,7,0,20,ACTIVE,2025-11-17T12:53:54.292574
+jamie-moreno,IT,Software Engineer,30,10,16,4,ACTIVE,2025-11-17T12:53:54.292574
+janice-johnson,Finance,Accountant,23,10,9,4,ACTIVE,2025-11-17T12:53:54.292574
+jared-anderson,Finance,Financial Analyst,28,6,12,10,ACTIVE,2025-11-17T12:53:54.292574
+jared-douglas,Operations,Logistics Coordinator,26,8,9,9,ACTIVE,2025-11-17T12:53:54.292574
+jasmine-burns,Operations,Logistics Coordinator,23,5,15,3,ACTIVE,2025-11-17T12:53:54.292574
+jason-carter,Finance,Financial Analyst,23,9,6,8,ACTIVE,2025-11-17T12:53:54.292574
+jeffery-forbes,Marketing,Marketing Specialist,29,8,19,2,ACTIVE,2025-11-17T12:53:54.292574
+jeffery-jones,Finance,Financial Analyst,24,3,20,1,ACTIVE,2025-11-17T12:53:54.292574
+jeffrey-boyd,IT,System Administrator,27,10,1,16,ACTIVE,2025-11-17T12:53:54.292574
+jeffrey-garrett,Finance,Accountant,20,5,15,0,NO_BALANCE,2025-11-17T12:53:54.292574
+jeffrey-sherman,Finance,Financial Analyst,22,4,18,0,NO_BALANCE,2025-11-17T12:53:54.292574
+jeffrey-walsh,Operations,Logistics Coordinator,26,1,25,0,NO_BALANCE,2025-11-17T12:53:54.292574
+jennifer-campbell,Finance,Accountant,22,1,0,21,ACTIVE,2025-11-17T12:53:54.292574
+jennifer-santiago,Operations,Operations Manager,25,2,5,18,ACTIVE,2025-11-17T12:53:54.292574
+jennifer-wiggins,Operations,Operations Manager,27,9,7,11,ACTIVE,2025-11-17T12:53:54.292574
+jessica-beard,Operations,Logistics Coordinator,25,6,15,4,ACTIVE,2025-11-17T12:53:54.292574
+jessica-chaney,Finance,Financial Analyst,26,10,5,11,ACTIVE,2025-11-17T12:53:54.292574
+jessica-glover,Marketing,SEO Analyst,30,3,17,10,ACTIVE,2025-11-17T12:53:54.292574
+jessica-smith,IT,Software Engineer,26,1,10,15,ACTIVE,2025-11-17T12:53:54.292574
+jessica-thomas,Finance,Accountant,25,2,22,1,ACTIVE,2025-11-17T12:53:54.292574
+jimmy-arnold,Operations,Logistics Coordinator,27,5,17,5,ACTIVE,2025-11-17T12:53:54.292574
+joanna-frye,Marketing,Marketing Specialist,28,9,1,18,ACTIVE,2025-11-17T12:53:54.292574
+joel-chandler,Operations,Operations Manager,30,3,13,14,ACTIVE,2025-11-17T12:53:54.292574
+joel-walker,HR,HR Manager,20,3,7,10,ACTIVE,2025-11-17T12:53:54.292574
+john-francis,Operations,Operations Manager,28,8,14,6,ACTIVE,2025-11-17T12:53:54.292574
+john-miller,Marketing,SEO Analyst,27,2,12,13,ACTIVE,2025-11-17T12:53:54.292574
+john-montgomery,Marketing,Marketing Specialist,21,10,6,5,ACTIVE,2025-11-17T12:53:54.292574
+john-reese,IT,Software Engineer,21,5,3,13,ACTIVE,2025-11-17T12:53:54.292574
+joseph-benson,IT,System Administrator,25,7,12,6,ACTIVE,2025-11-17T12:53:54.292574
+joseph-grant,IT,Software Engineer,24,4,9,11,ACTIVE,2025-11-17T12:53:54.292574
+joseph-hanna,Operations,Operations Manager,22,5,6,11,ACTIVE,2025-11-17T12:53:54.292574
+joseph-james-md,Marketing,SEO Analyst,24,8,13,3,ACTIVE,2025-11-17T12:53:54.292574
+joseph-lawrence,IT,System Administrator,27,7,0,20,ACTIVE,2025-11-17T12:53:54.292574
+joseph-manning,Marketing,SEO Analyst,28,6,9,13,ACTIVE,2025-11-17T12:53:54.292574
+joseph-wheeler,Marketing,SEO Analyst,28,3,25,0,NO_BALANCE,2025-11-17T12:53:54.292574
+joshua-nelson,Operations,Logistics Coordinator,30,3,20,7,ACTIVE,2025-11-17T12:53:54.292574
+joshua-phillips,Finance,Financial Analyst,23,5,15,3,ACTIVE,2025-11-17T12:53:54.292574
+juan-foster,Finance,Accountant,21,7,5,9,ACTIVE,2025-11-17T12:53:54.292574
+julia-contreras,HR,Recruiter,21,8,12,1,ACTIVE,2025-11-17T12:53:54.292574
+julia-rivers,Marketing,Marketing Specialist,20,6,9,5,ACTIVE,2025-11-17T12:53:54.292574
+justin-smith,Operations,Operations Manager,26,7,17,2,ACTIVE,2025-11-17T12:53:54.292574
+justin-waller,HR,HR Manager,24,7,8,9,ACTIVE,2025-11-17T12:53:54.292574
+kathryn-grant,IT,System Administrator,22,7,15,0,NO_BALANCE,2025-11-17T12:53:54.292574
+kathryn-hobbs,Operations,Operations Manager,29,9,19,1,ACTIVE,2025-11-17T12:53:54.292574
+katie-stewart,HR,HR Manager,26,3,3,20,ACTIVE,2025-11-17T12:53:54.292574
+kayla-anderson,Finance,Financial Analyst,29,10,3,16,ACTIVE,2025-11-17T12:53:54.292574
+kelly-adams,Operations,Operations Manager,21,8,1,12,ACTIVE,2025-11-17T12:53:54.292574
+kelly-adkins,Finance,Financial Analyst,25,3,3,19,ACTIVE,2025-11-17T12:53:54.292574
+kelly-alexander,Finance,Accountant,28,6,19,3,ACTIVE,2025-11-17T12:53:54.292574
+kelly-hendrix,HR,HR Manager,22,6,11,5,ACTIVE,2025-11-17T12:53:54.292574
+kenneth-smith,Operations,Operations Manager,23,5,7,11,ACTIVE,2025-11-17T12:53:54.292574
+kenneth-williamson,Finance,Financial Analyst,23,3,13,7,ACTIVE,2025-11-17T12:53:54.292574
+kevin-orr,Operations,Operations Manager,30,10,7,13,ACTIVE,2025-11-17T12:53:54.292574
+kevin-wall,Marketing,SEO Analyst,30,5,24,1,ACTIVE,2025-11-17T12:53:54.292574
+kim-rodriguez,Marketing,SEO Analyst,23,7,3,13,ACTIVE,2025-11-17T12:53:54.292574
+kim-ross,HR,Recruiter,24,8,4,12,ACTIVE,2025-11-17T12:53:54.292574
+kimberly-alexander,Operations,Operations Manager,22,3,15,4,ACTIVE,2025-11-17T12:53:54.292574
+kimberly-maxwell,Operations,Logistics Coordinator,23,5,14,4,ACTIVE,2025-11-17T12:53:54.292574
+kimberly-nichols,IT,System Administrator,29,5,5,19,ACTIVE,2025-11-17T12:53:54.292574
+kimberly-perez,Marketing,Marketing Specialist,22,4,17,1,ACTIVE,2025-11-17T12:53:54.292574
+kimberly-sanford,Operations,Logistics Coordinator,21,2,0,19,ACTIVE,2025-11-17T12:53:54.292574
+kristen-kerr,Marketing,Marketing Specialist,24,10,6,8,ACTIVE,2025-11-17T12:53:54.292574
+kristina-lowe,Finance,Accountant,23,10,7,6,ACTIVE,2025-11-17T12:53:54.292574
+kristina-porter,IT,Software Engineer,25,7,15,3,ACTIVE,2025-11-17T12:53:54.292574
+kristopher-estrada,Finance,Accountant,22,1,7,14,ACTIVE,2025-11-17T12:53:54.292574
+kyle-martinez,Operations,Logistics Coordinator,22,1,17,4,ACTIVE,2025-11-17T12:53:54.292574
+lauren-santos,Finance,Financial Analyst,30,7,12,11,ACTIVE,2025-11-17T12:53:54.292574
+leah-wagner,HR,HR Manager,22,8,6,8,ACTIVE,2025-11-17T12:53:54.292574
+lee-abbott,Marketing,Marketing Specialist,23,10,11,2,ACTIVE,2025-11-17T12:53:54.292574
+leroy-berry,Operations,Logistics Coordinator,30,10,1,19,ACTIVE,2025-11-17T12:53:54.292574
+leslie-barajas,HR,HR Manager,23,9,13,1,ACTIVE,2025-11-17T12:53:54.292574
+leslie-henry,IT,Software Engineer,22,9,5,8,ACTIVE,2025-11-17T12:53:54.292574
+linda-reynolds,Finance,Accountant,20,4,7,9,ACTIVE,2025-11-17T12:53:54.292574
+lisa-gibson,Operations,Operations Manager,29,4,18,7,ACTIVE,2025-11-17T12:53:54.292574
+lisa-jones,IT,Software Engineer,22,7,5,10,ACTIVE,2025-11-17T12:53:54.292574
+lisa-rasmussen,Marketing,SEO Analyst,30,3,15,12,ACTIVE,2025-11-17T12:53:54.292574
+lisa-richardson,Operations,Logistics Coordinator,30,9,13,8,ACTIVE,2025-11-17T12:53:54.292574
+lisa-smith,Finance,Accountant,26,3,18,5,ACTIVE,2025-11-17T12:53:54.292574
+luis-watson,Marketing,SEO Analyst,29,2,4,23,ACTIVE,2025-11-17T12:53:54.292574
+luke-jackson,HR,Recruiter,25,7,8,10,ACTIVE,2025-11-17T12:53:54.292574
+marcus-jackson,IT,Software Engineer,25,4,4,17,ACTIVE,2025-11-17T12:53:54.292574
+margaret-huber,Operations,Logistics Coordinator,29,6,7,16,ACTIVE,2025-11-17T12:53:54.292574
+marissa-richards,IT,Software Engineer,24,3,19,2,ACTIVE,2025-11-17T12:53:54.292574
+mark-boyd,HR,Recruiter,26,3,1,22,ACTIVE,2025-11-17T12:53:54.292574
+martin-anderson,IT,System Administrator,28,6,11,11,ACTIVE,2025-11-17T12:53:54.292574
+martin-townsend,HR,Recruiter,26,9,10,7,ACTIVE,2025-11-17T12:53:54.292574
+matthew-newman,Finance,Financial Analyst,20,10,3,7,ACTIVE,2025-11-17T12:53:54.292574
+maxwell-gordon,Operations,Logistics Coordinator,21,9,0,12,ACTIVE,2025-11-17T12:53:54.292574
+meghan-mills,Operations,Logistics Coordinator,29,1,10,18,ACTIVE,2025-11-17T12:53:54.292574
+melissa-bentley,IT,System Administrator,24,10,8,6,ACTIVE,2025-11-17T12:53:54.292574
+melissa-coleman,HR,Recruiter,28,8,16,4,ACTIVE,2025-11-17T12:53:54.292574
+michael-adkins,IT,Software Engineer,25,1,22,2,ACTIVE,2025-11-17T12:53:54.292574
+michael-anderson,Marketing,SEO Analyst,25,5,18,2,ACTIVE,2025-11-17T12:53:54.292574
+michael-collier,HR,HR Manager,28,6,5,17,ACTIVE,2025-11-17T12:53:54.292574
+michael-dorsey,Operations,Operations Manager,20,5,1,14,ACTIVE,2025-11-17T12:53:54.292574
+michael-edwards,HR,HR Manager,25,4,6,15,ACTIVE,2025-11-17T12:53:54.292574
+michael-merritt,HR,Recruiter,25,2,20,3,ACTIVE,2025-11-17T12:53:54.292574
+michael-moore,IT,Software Engineer,21,5,4,12,ACTIVE,2025-11-17T12:53:54.292574
+michelle-lowe,Operations,Operations Manager,26,8,1,17,ACTIVE,2025-11-17T12:53:54.292574
+miranda-weaver,HR,Recruiter,28,9,4,15,ACTIVE,2025-11-17T12:53:54.292574
+molly-vang,IT,System Administrator,28,2,15,11,ACTIVE,2025-11-17T12:53:54.292574
+mr-erik-meyer,Marketing,Marketing Specialist,22,7,6,9,ACTIVE,2025-11-17T12:53:54.292574
+mrs-carla-griffith,HR,HR Manager,30,3,13,14,ACTIVE,2025-11-17T12:53:54.292574
+mrs-catherine-dodson,Operations,Operations Manager,22,7,7,8,ACTIVE,2025-11-17T12:53:54.292574
+mrs-melissa-bryant,IT,System Administrator,23,6,7,10,ACTIVE,2025-11-17T12:53:54.292574
+natasha-garcia,HR,Recruiter,24,7,13,4,ACTIVE,2025-11-17T12:53:54.292574
+nathan-palmer,HR,Recruiter,24,3,15,6,ACTIVE,2025-11-17T12:53:54.292574
+nicholas-berry,IT,System Administrator,24,2,7,15,ACTIVE,2025-11-17T12:53:54.292574
+nicholas-thompson,Finance,Accountant,23,2,4,17,ACTIVE,2025-11-17T12:53:54.292574
+nicole-day,Operations,Operations Manager,26,6,7,13,ACTIVE,2025-11-17T12:53:54.292574
+olivia-lopez,Operations,Operations Manager,30,9,0,21,ACTIVE,2025-11-17T12:53:54.292574
+patricia-banks,Finance,Financial Analyst,23,3,7,13,ACTIVE,2025-11-17T12:53:54.292574
+patricia-simon,Operations,Operations Manager,29,2,1,26,ACTIVE,2025-11-17T12:53:54.292574
+paul-barry,Finance,Accountant,29,10,8,11,ACTIVE,2025-11-17T12:53:54.292574
+paul-davis,Operations,Operations Manager,21,3,18,0,NO_BALANCE,2025-11-17T12:53:54.292574
+paul-wade,IT,System Administrator,23,5,0,18,ACTIVE,2025-11-17T12:53:54.292574
+paula-marsh,Finance,Financial Analyst,22,9,11,2,ACTIVE,2025-11-17T12:53:54.292574
+peggy-trujillo,Operations,Operations Manager,30,5,24,1,ACTIVE,2025-11-17T12:53:54.292574
+peter-ryan,IT,System Administrator,30,9,7,14,ACTIVE,2025-11-17T12:53:54.292574
+phillip-alvarez,Finance,Financial Analyst,30,4,9,17,ACTIVE,2025-11-17T12:53:54.292574
+rachel-branch,Finance,Accountant,22,9,0,13,ACTIVE,2025-11-17T12:53:54.292574
+rachel-jones,Operations,Logistics Coordinator,26,2,15,9,ACTIVE,2025-11-17T12:53:54.292574
+randall-medina,Marketing,Marketing Specialist,23,7,15,1,ACTIVE,2025-11-17T12:53:54.292574
+randy-reyes,IT,System Administrator,22,8,12,2,ACTIVE,2025-11-17T12:53:54.292574
+raymond-fernandez,Operations,Operations Manager,29,4,21,4,ACTIVE,2025-11-17T12:53:54.292574
+renee-coleman,IT,Software Engineer,27,1,18,8,ACTIVE,2025-11-17T12:53:54.292574
+rhonda-gilbert,Finance,Financial Analyst,29,4,2,23,ACTIVE,2025-11-17T12:53:54.292574
+rhonda-mills,HR,HR Manager,24,4,13,7,ACTIVE,2025-11-17T12:53:54.292574
+richard-mcfarland,IT,Software Engineer,23,8,3,12,ACTIVE,2025-11-17T12:53:54.292574
+richard-miller,Marketing,Marketing Specialist,30,8,15,7,ACTIVE,2025-11-17T12:53:54.292574
+rita-hull,Marketing,Marketing Specialist,23,2,14,7,ACTIVE,2025-11-17T12:53:54.292574
+robert-cervantes,Finance,Financial Analyst,24,4,1,19,ACTIVE,2025-11-17T12:53:54.292574
+robert-hardy,Finance,Financial Analyst,28,8,17,3,ACTIVE,2025-11-17T12:53:54.292574
+robert-jones,IT,Software Engineer,28,7,0,21,ACTIVE,2025-11-17T12:53:54.292574
+robin-stephens,Marketing,Marketing Specialist,20,7,12,1,ACTIVE,2025-11-17T12:53:54.292574
+ruben-marshall,HR,HR Manager,28,4,9,15,ACTIVE,2025-11-17T12:53:54.292574
+ryan-davis,Finance,Financial Analyst,26,8,12,6,ACTIVE,2025-11-17T12:53:54.292574
+sally-chapman,IT,System Administrator,24,7,7,10,ACTIVE,2025-11-17T12:53:54.292574
+samantha-fowler,IT,Software Engineer,25,3,20,2,ACTIVE,2025-11-17T12:53:54.292574
+sandra-chen,Finance,Accountant,26,7,17,2,ACTIVE,2025-11-17T12:53:54.292574
+sandra-lara,Finance,Financial Analyst,22,3,1,18,ACTIVE,2025-11-17T12:53:54.292574
+sara-proctor,IT,Software Engineer,24,1,1,22,ACTIVE,2025-11-17T12:53:54.292574
+scott-johnson,Operations,Logistics Coordinator,22,7,7,8,ACTIVE,2025-11-17T12:53:54.292574
+sean-shah,Operations,Logistics Coordinator,20,8,5,7,ACTIVE,2025-11-17T12:53:54.292574
+sean-smith,IT,System Administrator,25,6,9,10,ACTIVE,2025-11-17T12:53:54.292574
+sean-williams,HR,Recruiter,22,3,13,6,ACTIVE,2025-11-17T12:53:54.292574
+shane-mcguire,Finance,Financial Analyst,30,9,12,9,ACTIVE,2025-11-17T12:53:54.292574
+shannon-hanson,IT,System Administrator,21,8,7,6,ACTIVE,2025-11-17T12:53:54.292574
+shannon-lowe,HR,Recruiter,21,2,17,2,ACTIVE,2025-11-17T12:53:54.292574
+sharon-aguilar,Finance,Financial Analyst,20,8,7,5,ACTIVE,2025-11-17T12:53:54.292574
+shawn-baker,HR,HR Manager,28,6,6,16,ACTIVE,2025-11-17T12:53:54.292574
+shelby-franklin,HR,HR Manager,24,6,4,14,ACTIVE,2025-11-17T12:53:54.292574
+shelly-wagner,Finance,Financial Analyst,22,8,7,7,ACTIVE,2025-11-17T12:53:54.292574
+sherri-gordon,Finance,Financial Analyst,20,3,17,0,NO_BALANCE,2025-11-17T12:53:54.292574
+sonia-myers,Marketing,SEO Analyst,27,10,3,14,ACTIVE,2025-11-17T12:53:54.292574
+stacey-obrien,Operations,Operations Manager,24,10,1,13,ACTIVE,2025-11-17T12:53:54.292574
+steven-barnes,Operations,Operations Manager,30,10,2,18,ACTIVE,2025-11-17T12:53:54.292574
+steven-patterson,Operations,Operations Manager,24,5,13,6,ACTIVE,2025-11-17T12:53:54.292574
+steven-thomas,Finance,Accountant,22,3,6,13,ACTIVE,2025-11-17T12:53:54.292574
+suzanne-green,Marketing,Marketing Specialist,28,3,12,13,ACTIVE,2025-11-17T12:53:54.292574
+tammy-morris,Marketing,Marketing Specialist,24,4,18,2,ACTIVE,2025-11-17T12:53:54.292574
+tammy-pearson,IT,Software Engineer,20,4,15,1,ACTIVE,2025-11-17T12:53:54.292574
+tammy-watson,IT,System Administrator,25,3,13,9,ACTIVE,2025-11-17T12:53:54.292574
+tanya-cameron,HR,Recruiter,27,5,13,9,ACTIVE,2025-11-17T12:53:54.292574
+terri-olsen,Finance,Accountant,23,6,16,1,ACTIVE,2025-11-17T12:53:54.292574
+terri-salas,Marketing,SEO Analyst,29,3,0,26,ACTIVE,2025-11-17T12:53:54.292574
+terry-campbell,Finance,Accountant,22,5,9,8,ACTIVE,2025-11-17T12:53:54.292574
+theresa-barber-md,HR,Recruiter,24,7,8,9,ACTIVE,2025-11-17T12:53:54.292574
+theresa-garcia,Finance,Financial Analyst,30,3,20,7,ACTIVE,2025-11-17T12:53:54.292574
+thomas-daniels,HR,Recruiter,27,5,1,21,ACTIVE,2025-11-17T12:53:54.292574
+thomas-preston,Marketing,Marketing Specialist,28,5,12,11,ACTIVE,2025-11-17T12:53:54.292574
+tiffany-cabrera,HR,Recruiter,22,7,2,13,ACTIVE,2025-11-17T12:53:54.292574
+timothy-carter,Finance,Financial Analyst,20,3,8,9,ACTIVE,2025-11-17T12:53:54.292574
+todd-preston,Finance,Financial Analyst,27,9,17,1,ACTIVE,2025-11-17T12:53:54.292574
+todd-vaughn,Marketing,Marketing Specialist,26,5,13,8,ACTIVE,2025-11-17T12:53:54.292574
+tonya-murray,Marketing,SEO Analyst,29,7,18,4,ACTIVE,2025-11-17T12:53:54.292574
+tracey-chase,IT,System Administrator,20,9,3,8,ACTIVE,2025-11-17T12:53:54.292574
+traci-frye,HR,Recruiter,20,3,1,16,ACTIVE,2025-11-17T12:53:54.292574
+tracy-serrano,HR,Recruiter,26,4,4,18,ACTIVE,2025-11-17T12:53:54.292574
+vanessa-rogers,Operations,Logistics Coordinator,22,9,11,2,ACTIVE,2025-11-17T12:53:54.292574
+vincent-gonzalez,HR,Recruiter,29,10,12,7,ACTIVE,2025-11-17T12:53:54.292574
+whitney-davis,Marketing,Marketing Specialist,30,2,2,26,ACTIVE,2025-11-17T12:53:54.292574
+whitney-smith,IT,Software Engineer,28,7,12,9,ACTIVE,2025-11-17T12:53:54.292574
+william-abbott,HR,HR Manager,21,4,17,0,NO_BALANCE,2025-11-17T12:53:54.292574
+william-farrell,Operations,Logistics Coordinator,30,9,20,1,ACTIVE,2025-11-17T12:53:54.292574
+william-lopez,Finance,Financial Analyst,20,5,11,4,ACTIVE,2025-11-17T12:53:54.292574
+william-mercado,Marketing,Marketing Specialist,24,1,2,21,ACTIVE,2025-11-17T12:53:54.292574
+william-ward,Operations,Operations Manager,30,7,22,1,ACTIVE,2025-11-17T12:53:54.292574
+yolanda-holt,Operations,Logistics Coordinator,30,6,19,5,ACTIVE,2025-11-17T12:53:54.292574
+zachary-castillo,Finance,Financial Analyst,24,9,2,13,ACTIVE,2025-11-17T12:53:54.292574

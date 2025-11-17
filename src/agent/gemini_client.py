@@ -1,0 +1,165 @@
+"""
+Gemini LLM client (Google AI Studio) for Leave Management System.
+
+This client replaces SageMaker / AgentRouter usage and talks directly to
+Gemini 2.5 Flash using the official `google-genai` SDK:
+
+    from google import genai
+    client = genai.Client()
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents="Explain how AI works in a few words",
+    )
+    print(response.text)
+"""
+from __future__ import annotations
+
+import json
+import os
+from typing import Any, Dict
+
+from google import genai
+
+from .prompt_builder import command_prompt, narrative_prompt
+
+
+class GeminiLLM:
+    """
+    High-level wrapper around Gemini chat completion for this project.
+
+    Environment variables:
+    - GOOGLE_API_KEY or GEMINI_API_KEY: API key from Google AI Studio
+    - GEMINI_MODEL (optional): defaults to "gemini-2.5-flash"
+    """
+
+    def __init__(
+        self,
+        api_key: str | None = None,
+        model: str | None = None,
+    ) -> None:
+        api_key = api_key or os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise RuntimeError(
+                "Gemini API key not found. Set GOOGLE_API_KEY or GEMINI_API_KEY "
+                "in your environment / .env (from Google AI Studio)."
+            )
+
+        self.model = model or os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        # The Client will pick up GOOGLE_API_KEY automatically, but we pass it
+        # explicitly so it also works with GEMINI_API_KEY.
+        self._client = genai.Client(api_key=api_key)
+
+    def invoke(
+        self,
+        prompt: str,
+        temperature: float = 0.2,
+        max_tokens: int = 512,
+        system_prompt: str | None = None,
+    ) -> str:
+        """
+        Call Gemini with a simple text prompt and optional system message.
+
+        Returns:
+            Generated text response.
+        """
+        # The google-genai SDK expects contents to be a string.
+        # If we have a system prompt, prepend it to the user prompt.
+        contents: str
+        if system_prompt:
+            contents = f"{system_prompt}\n\n{prompt}"
+        else:
+            contents = prompt
+
+        response = self._client.models.generate_content(
+            model=self.model,
+            contents=contents,
+            config={
+                "temperature": temperature,
+                "max_output_tokens": max_tokens,
+            },
+        )
+
+        text = getattr(response, "text", None)
+        if isinstance(text, str) and text.strip():
+            return text.strip()
+
+        # Fallback: try to stringify the whole response
+        return str(response)
+
+    # The following helpers mirror the old SageMaker / AgentRouter interface
+
+    def command(self, user_message: str) -> Dict[str, Any]:
+        """
+        Parse user message into a command structure using the LLM.
+
+        Always attempts to return a JSON object with:
+        - action
+        - employee_id
+        - parameters
+        """
+        prompt = command_prompt(user_message)
+
+        system_prompt = """You are a helpful assistant that parses user requests into structured JSON commands.
+Always respond with valid JSON only, no additional text.
+The JSON must contain: action, employee_id, and parameters."""
+
+        try:
+            raw = self.invoke(
+                prompt,
+                temperature=0.1,
+                max_tokens=256,
+                system_prompt=system_prompt,
+            )
+
+            # Remove any stray markdown fences
+            response = raw.strip()
+            if response.startswith("```json"):
+                response = response[7:]
+            elif response.startswith("```"):
+                response = response[3:]
+            if response.endswith("```"):
+                response = response[:-3]
+
+            response = response.strip()
+            return json.loads(response)
+        except Exception as exc:
+            # Fall back to a simple error command; the service layer will still
+            # return something sensible to the user.
+            return {
+                "action": "error",
+                "employee_id": None,
+                "parameters": {
+                    "error": f"Failed to parse command with Gemini: {exc}",
+                },
+            }
+
+    def narrative(self, command: Dict[str, Any], data_payload: Dict[str, Any]) -> str:
+        """
+        Generate a human-readable narrative for the user.
+        """
+        prompt = narrative_prompt(command, data_payload)
+
+        system_prompt = """You are a helpful assistant for a leave management system.
+Generate clear, concise, and friendly responses to users about their leave requests and balances.
+Keep responses professional but conversational."""
+
+        try:
+            return self.invoke(
+                prompt,
+                temperature=0.4,
+                max_tokens=300,
+                system_prompt=system_prompt,
+            )
+        except Exception as exc:
+            # Fallback: dump JSON so the user still sees something
+            return json.dumps(
+                {
+                    "command": command,
+                    "data": data_payload,
+                    "error": f"Failed to generate narrative with Gemini: {exc}",
+                },
+                indent=2,
+            )
+
+
+

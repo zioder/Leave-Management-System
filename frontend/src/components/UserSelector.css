@@ -1,0 +1,65 @@
+.user-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.mode-selector {
+  display: flex;
+  gap: 20px;
+}
+
+.mode-selector label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.mode-selector input[type="radio"] {
+  cursor: pointer;
+}
+
+.employee-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.employee-selector label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.employee-dropdown {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  min-width: 250px;
+}
+
+.employee-dropdown:hover {
+  border-color: #007bff;
+}
+
+.employee-dropdown:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.admin-badge {
+  display: inline-block;
+  background-color: #28a745;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
