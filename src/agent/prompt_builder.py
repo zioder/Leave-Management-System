@@ -50,6 +50,9 @@ def command_prompt(user_message: str) -> str:
         - Dates must be ISO 8601 format (YYYY-MM-DD).
         - Omit optional parameters when not provided.{admin_note}
         - Extract employee_id from the message if present, otherwise use the one from context.
+        - Employee IDs are in format "firstname-lastname" (e.g., "adam-solomon").
+        - When user mentions just a first name (e.g., "Adam"), extract it as employee_id: "adam" (lowercase).
+        - The backend will resolve partial names to full employee IDs.
 
         Output ONLY minified JSON, nothing else.
 

@@ -16,6 +16,42 @@ from src.storage.s3_storage import S3Storage
 from .gemini_client import GeminiLLM
 
 
+def resolve_employee_name(storage: S3Storage, name_query: str) -> str | None:
+    """
+    Resolve a name query (e.g., 'Adam', 'adam solomon') to an employee_id.
+    Returns the employee_id if found, None otherwise.
+    """
+    name_query = name_query.lower().strip()
+    employees = storage.scan("EngineerAvailability")
+    
+    # Try exact match first (e.g., "adam-solomon")
+    for emp in employees:
+        emp_id = emp.get("employee_id", "").lower()
+        if emp_id == name_query:
+            return emp["employee_id"]
+    
+    # Try partial match (e.g., "adam" matches "adam-solomon")
+    matches = []
+    for emp in employees:
+        emp_id = emp.get("employee_id", "")
+        # Check if query matches first name or full name
+        if name_query in emp_id.lower():
+            matches.append(emp_id)
+    
+    # If exactly one match, return it
+    if len(matches) == 1:
+        return matches[0]
+    
+    # If multiple matches, try to find the best one
+    # Prefer match at the start (first name match)
+    for emp_id in matches:
+        if emp_id.lower().startswith(name_query + "-"):
+            return emp_id
+    
+    # Return first match if available
+    return matches[0] if matches else None
+
+
 def query_balance(storage: S3Storage, employee_id: str) -> Dict[str, Any]:
     """Query leave balance for an employee."""
     item = storage.get_item("LeaveQuota", {"employee_id": employee_id})
@@ -224,16 +260,30 @@ def handle_user_message(message: str, employee_id: str | None = None, is_admin: 
     # Always use Gemini as the LLM backend
     llm = GeminiLLM()
     
-    # Add employee_id to message if provided
-    if employee_id:
-        message = f"{message} employee_id: {employee_id}"
+    # For admin queries, add context of available employees
+    enhanced_message = message
     if is_admin:
-        message = f"{message} [ADMIN_MODE]"
+        # Get list of employees to help LLM resolve names
+        employees = storage.scan("EngineerAvailability")[:30]  # Limit to avoid context overflow
+        employee_list = ", ".join([emp.get("employee_id", "") for emp in employees])
+        enhanced_message = f"{message}\n\nAvailable employees: {employee_list}"
+        enhanced_message = f"{enhanced_message} [ADMIN_MODE]"
+    elif employee_id:
+        enhanced_message = f"{message} employee_id: {employee_id}"
     
-    command = llm.command(message)
+    command = llm.command(enhanced_message)
 
     action = command.get("action")
     cmd_employee_id = command.get("employee_id") or employee_id
+    
+    # If admin query and employee_id in command looks like a name (e.g., "adam" instead of "adam-solomon"),
+    # try to resolve it to an actual employee_id
+    if is_admin and cmd_employee_id and "-" not in cmd_employee_id:
+        resolved_id = resolve_employee_name(storage, cmd_employee_id)
+        if resolved_id:
+            cmd_employee_id = resolved_id
+            # Update the command with resolved ID
+            command["employee_id"] = resolved_id
     
     # Admin-specific actions
     if is_admin and action == "get_all_employees":

@@ -30,14 +30,20 @@ def get_employees_handler():
         employees = employees[:30]
         
         # Format for frontend dropdown
-        employees_list = [
-            {
-                "id": emp["employee_id"],
-                "name": emp.get("name", emp["employee_id"]),
-                "department": emp.get("department", "Unknown")
-            }
-            for emp in employees
-        ]
+        employees_list = []
+        for emp in employees:
+            emp_id = emp["employee_id"]
+            # Convert "adam-solomon" to "Adam Solomon"
+            name = emp_id.replace("-", " ").title()
+            employees_list.append({
+                "id": emp_id,
+                "name": name,
+                "department": emp.get("department", "Unknown"),
+                "status": emp.get("current_status", "AVAILABLE")
+            })
+        
+        # Sort by name
+        employees_list.sort(key=lambda x: x["name"])
         
         return {
             "statusCode": 200,
