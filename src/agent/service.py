@@ -314,5 +314,50 @@ def handle_user_message(message: str, employee_id: str | None = None, is_admin: 
             "sample_count": min(5, len(narrative_data.get("employees", [])))
         }
     
-    narrative = llm.narrative(command, narrative_data)
+    # Generate narrative with fallback
+    try:
+        narrative = llm.narrative(command, narrative_data)
+        
+        # If narrative is the generic error message, create a simple fallback
+        if "trouble generating a response" in narrative:
+            narrative = generate_simple_narrative(action, data)
+    except Exception:
+        narrative = generate_simple_narrative(action, data)
+    
     return {"command": command, "data": data, "message": narrative}
+
+
+def generate_simple_narrative(action: str, data: Dict[str, Any]) -> str:
+    """Generate a simple text narrative when Gemini fails."""
+    if action == "query_balance":
+        avail = data.get("available_days", 0)
+        taken = data.get("taken_ytd", 0)
+        return f"You have {avail} leave days available. You've taken {taken} days so far this year."
+    
+    elif action == "get_availability_stats":
+        total = data.get("total_engineers", 0)
+        available = data.get("available", 0)
+        on_leave = data.get("on_leave", 0)
+        pct = data.get("availability_percentage", 0)
+        return f"Team Status: {available} out of {total} engineers are available ({pct:.1f}%). {on_leave} engineers are currently on leave."
+    
+    elif action == "request_leave":
+        status = data.get("status", "UNKNOWN")
+        if status == "APPROVED":
+            return f"✅ Your leave request has been approved! {data.get('message', '')}"
+        elif status == "DENIED":
+            return f"❌ Your leave request was denied. {data.get('reason', '')}"
+        else:
+            return f"Leave request status: {status}"
+    
+    elif action == "get_all_employees":
+        total = data.get("total", 0)
+        showing = data.get("showing", 0)
+        return f"Showing {showing} out of {total} total employees."
+    
+    elif action == "list_requests":
+        requests = data.get("requests", [])
+        return f"Found {len(requests)} leave requests."
+    
+    else:
+        return "Request processed successfully."

@@ -90,10 +90,25 @@ class GeminiLLM:
                 candidate = response.candidates[0]
                 if hasattr(candidate, "content") and candidate.content:
                     parts = getattr(candidate.content, "parts", [])
-                    if parts:
+                    if parts and len(parts) > 0:
+                        # Try different ways to get text
                         part_text = getattr(parts[0], "text", None)
-                        if part_text:
+                        if not part_text and hasattr(parts[0], "__dict__"):
+                            # Try to get text from the part's dict
+                            part_dict = parts[0].__dict__ if hasattr(parts[0], "__dict__") else {}
+                            part_text = part_dict.get("text") or part_dict.get("_text")
+                        
+                        if part_text and isinstance(part_text, str):
                             return part_text.strip()
+        except Exception as e:
+            # Log the exception but don't crash
+            import sys
+            print(f"Warning: Failed to extract text from Gemini response: {e}", file=sys.stderr)
+        
+        # Check if response has any useful attributes we can extract
+        try:
+            if hasattr(response, "__dict__"):
+                print(f"Warning: Gemini response has no text. Response type: {type(response)}", file=sys.stderr)
         except Exception:
             pass
 
