@@ -4,19 +4,17 @@ Admin-specific service functions for leave management system.
 from __future__ import annotations
 
 import json
+import os
 from typing import Any, Dict, List
 
-import boto3
-
-from src.config import load as load_config
+from src.storage.s3_storage import S3Storage
 
 
-def get_employee_list(dynamodb, engineer_table: str) -> List[Dict[str, Any]]:
+def get_employee_list(storage: S3Storage) -> List[Dict[str, Any]]:
     """Get list of all employees for dropdown selection."""
-    table = dynamodb.Table(engineer_table)
-    result = table.scan(ProjectionExpression="employee_id,current_status")
+    engineers = storage.scan("EngineerAvailability")
     employees = []
-    for item in result.get("Items", []):
+    for item in engineers:
         employees.append({
             "id": item.get("employee_id"),
             "name": item.get("employee_id").replace("-", " ").title(),
@@ -41,12 +39,19 @@ def lambda_handler(event: Dict[str, Any], _context) -> Dict[str, Any]:
             "body": "",
         }
     
-    cfg = load_config()
-    dynamodb = boto3.resource("dynamodb", region_name=cfg.region)
+    bucket = os.environ.get("LEAVE_MGMT_S3_BUCKET", "")
+    if not bucket:
+        return {
+            "statusCode": 500,
+            "headers": {"Access-Control-Allow-Origin": "*"},
+            "body": json.dumps({"error": "S3 bucket not configured"}),
+        }
+    
+    storage = S3Storage(bucket)
     
     path = event.get("path", "")
     if path == "/employees" or event.get("action") == "get_employees":
-        employees = get_employee_list(dynamodb, cfg.dynamodb_engineer_table)
+        employees = get_employee_list(storage)
         return {
             "statusCode": 200,
             "headers": {"Access-Control-Allow-Origin": "*"},
@@ -58,5 +63,3 @@ def lambda_handler(event: Dict[str, Any], _context) -> Dict[str, Any]:
         "headers": {"Access-Control-Allow-Origin": "*"},
         "body": json.dumps({"error": "Not found"}),
     }
-
-

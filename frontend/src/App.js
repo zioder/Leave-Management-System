@@ -14,7 +14,7 @@ function App() {
   useEffect(() => {
     // Load employees for dropdown
     getEmployees()
-      .then(data => setEmployees(data.employees || []))
+      .then(data => setEmployees(data || []))
       .catch(err => console.error('Failed to load employees:', err));
   }, []);
 
