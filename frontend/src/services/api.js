@@ -39,7 +39,8 @@ export const sendMessage = async (message, employeeId = null, isAdmin = false) =
 export const getEmployees = async () => {
   try {
     const response = await api.get('/employees');
-    return response.data;
+    // Handle both direct array and {employees: [...]} format
+    return response.data.employees || response.data;
   } catch (error) {
     console.error('API Error:', error);
     throw error;
