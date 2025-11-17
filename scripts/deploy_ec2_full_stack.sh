@@ -107,63 +107,125 @@ aws ec2 authorize-security-group-ingress \
     --cidr 0.0.0.0/0 \
     --region $REGION 2>/dev/null || echo "SSH rule already exists"
 
-# Build and upload frontend to S3 BEFORE launching instance
-echo -e "${BLUE}📦 Building and uploading frontend to S3...${NC}"
-
-# Check if frontend directory exists
-if [ ! -d "frontend" ]; then
-    echo -e "${RED}❌ Error: frontend directory not found${NC}"
-    exit 1
-fi
-
-cd frontend
-
-# Install dependencies (need dev dependencies for build)
-echo -e "${BLUE}📥 Installing npm dependencies...${NC}"
-if [ ! -d "node_modules" ]; then
-    # Try npm install, if it fails, clear cache and retry
-    if ! npm install; then
-        echo -e "${YELLOW}⚠️  npm install failed, clearing cache and retrying...${NC}"
-        npm cache clean --force
-        if ! npm install; then
-            echo -e "${RED}❌ Error: npm install failed after cache clear${NC}"
-            echo "Check the npm error log above for details"
-            echo "You may need to check network connectivity or npm registry access"
+# Check if frontend build already exists in S3
+echo -e "${BLUE}📦 Checking frontend build in S3...${NC}"
+if aws s3 ls s3://${LEAVE_MGMT_S3_BUCKET}/app/frontend/index.html --region $REGION 2>/dev/null; then
+    echo -e "${GREEN}✅ Frontend build already exists in S3, skipping build step${NC}"
+    echo -e "${YELLOW}💡 To rebuild, delete from S3 first: aws s3 rm s3://${LEAVE_MGMT_S3_BUCKET}/app/frontend/ --recursive${NC}"
+else
+    echo -e "${YELLOW}⚠️  Frontend build not found in S3${NC}"
+    echo ""
+    echo -e "${BLUE}📋 You have two options:${NC}"
+    echo ""
+    echo -e "${YELLOW}Option 1: Build locally (Recommended - saves CloudShell space)${NC}"
+    echo "  1. On your local machine, run:"
+    echo "     cd frontend"
+    echo "     echo 'REACT_APP_API_URL=' > .env"
+    echo "     npm install"
+    echo "     npm run build"
+    echo "  2. Upload to S3:"
+    echo "     aws s3 sync frontend/build/ s3://${LEAVE_MGMT_S3_BUCKET}/app/frontend/ --region $REGION"
+    echo ""
+    echo -e "${YELLOW}Option 2: Build in CloudShell (requires free disk space)${NC}"
+    echo "  Press Enter to continue with CloudShell build..."
+    echo "  (Or Ctrl+C to exit and build locally)"
+    read -p "  Your choice: " choice
+    
+    # Check if frontend directory exists
+    if [ ! -d "frontend" ]; then
+        echo -e "${RED}❌ Error: frontend directory not found${NC}"
+        exit 1
+    fi
+    
+    cd frontend
+    
+    # Check available disk space
+    AVAILABLE_SPACE=$(df -BG . | tail -1 | awk '{print $4}' | sed 's/G//')
+    if [ "$AVAILABLE_SPACE" -lt 1 ]; then
+        echo -e "${RED}❌ Error: Less than 1GB disk space available${NC}"
+        echo -e "${YELLOW}Please free up space or build locally${NC}"
+        echo ""
+        echo "To free up space, run:"
+        echo "  npm cache clean --force"
+        echo "  rm -rf ~/.npm"
+        echo "  rm -rf node_modules"
+        exit 1
+    fi
+    
+    # Install dependencies (need dev dependencies for build)
+    echo -e "${BLUE}📥 Installing npm dependencies...${NC}"
+    
+    # Check if react-scripts is actually available (not just if node_modules exists)
+    NEED_INSTALL=true
+    if [ -d "node_modules" ] && [ -f "node_modules/.bin/react-scripts" ]; then
+        echo -e "${GREEN}✅ node_modules exists and react-scripts found, checking if install is needed...${NC}"
+        # Verify react-scripts works
+        if ./node_modules/.bin/react-scripts --version > /dev/null 2>&1; then
+            echo -e "${GREEN}✅ react-scripts is working, skipping install${NC}"
+            NEED_INSTALL=false
+        else
+            echo -e "${YELLOW}⚠️  react-scripts found but not working, reinstalling...${NC}"
+            rm -rf node_modules package-lock.json
+        fi
+    fi
+    
+    if [ "$NEED_INSTALL" = true ]; then
+        # Try npm install, if it fails, clear cache and retry
+        if ! npm install 2>&1 | tee /tmp/npm-install.log; then
+            echo -e "${YELLOW}⚠️  npm install failed, clearing cache and retrying...${NC}"
+            npm cache clean --force
+            rm -rf node_modules package-lock.json
+            if ! npm install; then
+                echo -e "${RED}❌ Error: npm install failed after cache clear${NC}"
+                echo "This is likely due to insufficient disk space in CloudShell"
+                echo "Please build locally and upload to S3 manually"
+                exit 1
+            fi
+        fi
+        echo -e "${GREEN}✅ Dependencies installed successfully${NC}"
+        
+        # Verify react-scripts is now available
+        if [ ! -f "node_modules/.bin/react-scripts" ]; then
+            echo -e "${RED}❌ Error: react-scripts not found after installation${NC}"
+            echo "Attempting to install react-scripts directly..."
+            npm install react-scripts --save
+        fi
+    fi
+    
+    # Build with relative API URL (will use same origin as the website)
+    # Set to empty string - api.js now handles empty string as relative paths
+    echo -e "${BLUE}🔨 Building React application...${NC}"
+    echo "REACT_APP_API_URL=" > .env
+    
+    if ! npm run build; then
+        echo -e "${RED}❌ Error: npm run build failed${NC}"
+        echo -e "${YELLOW}Attempting to fix by reinstalling dependencies...${NC}"
+        rm -rf node_modules package-lock.json
+        npm install
+        if ! npm run build; then
+            echo -e "${RED}❌ Error: npm run build failed after reinstall${NC}"
             exit 1
         fi
     fi
-    echo -e "${GREEN}✅ Dependencies installed successfully${NC}"
-else
-    echo -e "${GREEN}✅ node_modules already exists, skipping install${NC}"
+    
+    # Check if build was successful
+    if [ ! -d "build" ] || [ ! -f "build/index.html" ]; then
+        echo -e "${RED}❌ Error: Build directory or index.html not found${NC}"
+        exit 1
+    fi
+    
+    echo -e "${GREEN}✅ Build successful!${NC}"
+    
+    # Upload frontend build to S3
+    echo -e "${BLUE}📤 Uploading to S3...${NC}"
+    if ! aws s3 sync build/ s3://${LEAVE_MGMT_S3_BUCKET}/app/frontend/ --region $REGION; then
+        echo -e "${RED}❌ Error: Failed to upload to S3${NC}"
+        exit 1
+    fi
+    
+    echo -e "${GREEN}✅ Frontend uploaded to S3${NC}"
+    cd ..
 fi
-
-# Build with relative API URL (will use same origin as the website)
-# Set to empty string - api.js now handles empty string as relative paths
-echo -e "${BLUE}🔨 Building React application...${NC}"
-echo "REACT_APP_API_URL=" > .env
-
-if ! npm run build; then
-    echo -e "${RED}❌ Error: npm run build failed${NC}"
-    exit 1
-fi
-
-# Check if build was successful
-if [ ! -d "build" ] || [ ! -f "build/index.html" ]; then
-    echo -e "${RED}❌ Error: Build directory or index.html not found${NC}"
-    exit 1
-fi
-
-echo -e "${GREEN}✅ Build successful!${NC}"
-
-# Upload frontend build to S3
-echo -e "${BLUE}📤 Uploading to S3...${NC}"
-if ! aws s3 sync build/ s3://${LEAVE_MGMT_S3_BUCKET}/app/frontend/ --region $REGION; then
-    echo -e "${RED}❌ Error: Failed to upload to S3${NC}"
-    exit 1
-fi
-
-echo -e "${GREEN}✅ Frontend uploaded to S3${NC}"
-cd ..
 
 # Create user data script
 cat > user-data.sh << 'USERDATA'
