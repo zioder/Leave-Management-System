@@ -13,10 +13,34 @@ echo -e "${BLUE}║   Leave Management - EC2 Full Stack Deployment   ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════════════════╝${NC}"
 echo ""
 
-# Load environment variables
-if [ -f .env ]; then
-    export $(grep -v '^#' .env | xargs)
+# Determine project root directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ -d "$SCRIPT_DIR/../frontend" ]; then
+    PROJECT_ROOT="$SCRIPT_DIR/.."
+elif [ -d "$SCRIPT_DIR/frontend" ]; then
+    PROJECT_ROOT="$SCRIPT_DIR"
+else
+    echo -e "${RED}❌ Error: frontend directory not found${NC}"
+    echo "Please ensure you're running this from the project root or scripts directory"
+    exit 1
 fi
+
+# Change to project root
+cd "$PROJECT_ROOT"
+echo -e "${GREEN}📁 Working directory: $(pwd)${NC}"
+echo ""
+
+# Load environment variables from project root
+if [ -f "$PROJECT_ROOT/.env" ]; then
+    export $(grep -v '^#' "$PROJECT_ROOT/.env" | xargs)
+    echo -e "${GREEN}✅ Loaded environment variables${NC}"
+elif [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+    echo -e "${GREEN}✅ Loaded environment variables${NC}"
+else
+    echo -e "${YELLOW}⚠️  Warning: .env file not found${NC}"
+fi
+echo ""
 
 INSTANCE_TYPE="t2.micro"
 REGION="us-east-1"
