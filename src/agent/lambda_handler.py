@@ -4,9 +4,9 @@ from __future__ import annotations
 import json
 from typing import Any, Dict
 
+import os
 from .service import handle_user_message
-from ..storage.s3_storage import S3LeaveStorage
-from ..config import LEAVE_MGMT_S3_BUCKET
+from ..storage.s3_storage import S3Storage
 
 
 def get_cors_headers():
@@ -22,8 +22,9 @@ def get_cors_headers():
 def get_employees_handler():
     """Handle GET /employees endpoint."""
     try:
-        storage = S3LeaveStorage(LEAVE_MGMT_S3_BUCKET)
-        employees = storage.list_engineers()
+        bucket = os.environ.get("LEAVE_MGMT_S3_BUCKET", "")
+        storage = S3Storage(bucket)
+        employees = storage.scan("EngineerAvailability")
         
         # Format for frontend dropdown
         employees_list = [
