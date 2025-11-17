@@ -359,6 +359,8 @@ sed -i "s/BUCKET_NAME/${LEAVE_MGMT_S3_BUCKET}/g" user-data.sh
 
 # Launch EC2 instance
 echo -e "${BLUE}🚀 Launching EC2 instance...${NC}"
+
+# Try to launch with IAM instance profile first, fallback without it if permission denied
 INSTANCE_ID=$(aws ec2 run-instances \
     --image-id $AMI_ID \
     --instance-type $INSTANCE_TYPE \
@@ -369,7 +371,23 @@ INSTANCE_ID=$(aws ec2 run-instances \
     --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=leave-mgmt-server}]" \
     --region $REGION \
     --query 'Instances[0].InstanceId' \
-    --output text)
+    --output text 2>&1)
+
+# Check if we got an error about IAM permissions
+if echo "$INSTANCE_ID" | grep -q "UnauthorizedOperation\|iam:PassRole"; then
+    echo -e "${YELLOW}⚠️  Cannot attach IAM instance profile (permission denied), launching without it...${NC}"
+    echo -e "${YELLOW}   Note: EC2 will use default credentials. Ensure S3 and Lambda access is configured.${NC}"
+    INSTANCE_ID=$(aws ec2 run-instances \
+        --image-id $AMI_ID \
+        --instance-type $INSTANCE_TYPE \
+        --key-name $KEY_NAME \
+        --security-group-ids $SG_ID \
+        --user-data file://user-data.sh \
+        --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=leave-mgmt-server}]" \
+        --region $REGION \
+        --query 'Instances[0].InstanceId' \
+        --output text)
+fi
 
 echo "Instance ID: $INSTANCE_ID"
 
