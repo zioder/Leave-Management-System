@@ -6,7 +6,7 @@
 set -e
 
 S3_BUCKET="leave-mgmt-1763398367"
-ZIP_FILE="fo.zip"
+ZIP_FILE="fm.zip"
 
 echo "╔═══════════════════════════════════════════════════╗"
 echo "║      Deploying Frontend Build to S3              ║"
