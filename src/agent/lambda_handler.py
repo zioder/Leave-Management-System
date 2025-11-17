@@ -26,6 +26,9 @@ def get_employees_handler():
         storage = S3Storage(bucket)
         employees = storage.scan("EngineerAvailability")
         
+        # Limit to 30 engineers to reduce context size
+        employees = employees[:30]
+        
         # Format for frontend dropdown
         employees_list = [
             {

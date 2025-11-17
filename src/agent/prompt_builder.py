@@ -45,7 +45,7 @@ def command_prompt(user_message: str) -> str:
         - get_availability_stats: Get availability statistics (admin only)
 
         Constraints:
-        - There are 30 engineers; at least 20 must remain available.
+        - There are 30 engineers total; at least 20 must remain available.
         - Reject impossible requests by setting "action": "error" with explanation.
         - Dates must be ISO 8601 format (YYYY-MM-DD).
         - Omit optional parameters when not provided.{admin_note}

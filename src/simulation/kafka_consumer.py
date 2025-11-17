@@ -20,8 +20,8 @@ from kafka import KafkaConsumer
 
 from src.storage.s3_storage import S3Storage
 
-ENGINEER_TARGET = 20
-TOTAL_ENGINEERS = 30
+ENGINEER_TARGET = 20  # At least 20 must remain available
+TOTAL_ENGINEERS = 30  # Total engineers in the system
 
 
 def parse_message(message: bytes) -> Dict[str, Any]:

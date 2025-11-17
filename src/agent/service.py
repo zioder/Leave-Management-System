@@ -148,11 +148,11 @@ def request_leave_direct(storage: S3Storage, payload: Dict[str, Any]) -> Dict[st
     }
 
 
-def get_all_employees(storage: S3Storage) -> Dict[str, Any]:
+def get_all_employees(storage: S3Storage, limit: int = 30) -> Dict[str, Any]:
     """Get all employees with their availability and quota info (admin only)."""
     engineers = storage.scan("EngineerAvailability")
     result = []
-    for eng in engineers:
+    for eng in engineers[:limit]:  # Limit to prevent context overflow
         employee_id = eng.get("employee_id")
         quota = storage.get_item("LeaveQuota", {"employee_id": employee_id}) or {}
         result.append({
@@ -164,7 +164,14 @@ def get_all_employees(storage: S3Storage) -> Dict[str, Any]:
             "taken_ytd": float(quota.get("taken_ytd", 0)),
             "annual_allowance": float(quota.get("annual_allowance", 0)),
         })
-    return {"status": "OK", "employees": result}
+    
+    total_count = len(engineers)
+    return {
+        "status": "OK", 
+        "employees": result,
+        "total": total_count,
+        "showing": len(result)
+    }
 
 
 def get_availability_stats(storage: S3Storage) -> Dict[str, Any]:
@@ -246,5 +253,16 @@ def handle_user_message(message: str, employee_id: str | None = None, is_admin: 
     else:
         data = {"status": "UNSUPPORTED", "details": command}
 
-    narrative = llm.narrative(command, data)
+    # Create a simplified version for narrative (avoid context overflow)
+    narrative_data = data.copy()
+    if action == "get_all_employees" and "employees" in narrative_data:
+        # Only send summary stats for narrative, not full employee list
+        narrative_data = {
+            "status": narrative_data.get("status"),
+            "total": narrative_data.get("total"),
+            "showing": narrative_data.get("showing"),
+            "sample_count": min(5, len(narrative_data.get("employees", [])))
+        }
+    
+    narrative = llm.narrative(command, narrative_data)
     return {"command": command, "data": data, "message": narrative}

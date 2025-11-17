@@ -20,10 +20,13 @@ from src.storage.s3_storage import create_storage
 load_dotenv()
 
 
-def seed_engineers(storage, csv_path: Path) -> int:
+def seed_engineers(storage, csv_path: Path, limit: int = 30) -> int:
     """Seed engineer availability data."""
-    print(f"📊 Loading engineers from {csv_path}...")
+    print(f"📊 Loading engineers from {csv_path} (limit: {limit})...")
     df = pd.read_csv(csv_path)
+    
+    # Limit to reduce context size
+    df = df.head(limit)
     
     count = 0
     for _, row in df.iterrows():
@@ -43,10 +46,13 @@ def seed_engineers(storage, csv_path: Path) -> int:
     return count
 
 
-def seed_leave_quotas(storage, csv_path: Path) -> int:
+def seed_leave_quotas(storage, csv_path: Path, limit: int = 30) -> int:
     """Seed leave quota data."""
-    print(f"📊 Loading leave quotas from {csv_path}...")
+    print(f"📊 Loading leave quotas from {csv_path} (limit: {limit})...")
     df = pd.read_csv(csv_path)
+    
+    # Limit to reduce context size
+    df = df.head(limit)
     
     count = 0
     for _, row in df.iterrows():
@@ -146,11 +152,11 @@ def main() -> None:
         print("   Run: python3 -m src.data_prep.prepare_seed_data")
         sys.exit(1)
     
-    # Seed data
+    # Seed data (limit to 30 engineers to reduce context size)
     total = 0
-    total += seed_engineers(storage, engineers_csv)
-    total += seed_leave_quotas(storage, engineers_csv)
-    total += seed_leave_events(storage, events_csv, limit=50)
+    total += seed_engineers(storage, engineers_csv, limit=30)
+    total += seed_leave_quotas(storage, engineers_csv, limit=30)
+    total += seed_leave_events(storage, events_csv, limit=25)
     
     print("\n" + "=" * 60)
     print(f"✅ Successfully seeded {total} items to S3!")
