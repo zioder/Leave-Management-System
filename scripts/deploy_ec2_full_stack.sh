@@ -109,21 +109,60 @@ aws ec2 authorize-security-group-ingress \
 
 # Build and upload frontend to S3 BEFORE launching instance
 echo -e "${BLUE}📦 Building and uploading frontend to S3...${NC}"
+
+# Check if frontend directory exists
+if [ ! -d "frontend" ]; then
+    echo -e "${RED}❌ Error: frontend directory not found${NC}"
+    exit 1
+fi
+
 cd frontend
 
-# Install dependencies
+# Install dependencies (need dev dependencies for build)
+echo -e "${BLUE}📥 Installing npm dependencies...${NC}"
 if [ ! -d "node_modules" ]; then
-    npm install --production
+    # Try npm install, if it fails, clear cache and retry
+    if ! npm install; then
+        echo -e "${YELLOW}⚠️  npm install failed, clearing cache and retrying...${NC}"
+        npm cache clean --force
+        if ! npm install; then
+            echo -e "${RED}❌ Error: npm install failed after cache clear${NC}"
+            echo "Check the npm error log above for details"
+            echo "You may need to check network connectivity or npm registry access"
+            exit 1
+        fi
+    fi
+    echo -e "${GREEN}✅ Dependencies installed successfully${NC}"
+else
+    echo -e "${GREEN}✅ node_modules already exists, skipping install${NC}"
 fi
 
 # Build with relative API URL (will use same origin as the website)
 # Set to empty string - api.js now handles empty string as relative paths
+echo -e "${BLUE}🔨 Building React application...${NC}"
 echo "REACT_APP_API_URL=" > .env
-npm run build
+
+if ! npm run build; then
+    echo -e "${RED}❌ Error: npm run build failed${NC}"
+    exit 1
+fi
+
+# Check if build was successful
+if [ ! -d "build" ] || [ ! -f "build/index.html" ]; then
+    echo -e "${RED}❌ Error: Build directory or index.html not found${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}✅ Build successful!${NC}"
 
 # Upload frontend build to S3
-aws s3 sync build/ s3://${LEAVE_MGMT_S3_BUCKET}/app/frontend/ --region $REGION
+echo -e "${BLUE}📤 Uploading to S3...${NC}"
+if ! aws s3 sync build/ s3://${LEAVE_MGMT_S3_BUCKET}/app/frontend/ --region $REGION; then
+    echo -e "${RED}❌ Error: Failed to upload to S3${NC}"
+    exit 1
+fi
 
+echo -e "${GREEN}✅ Frontend uploaded to S3${NC}"
 cd ..
 
 # Create user data script
