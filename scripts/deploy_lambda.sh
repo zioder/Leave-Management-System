@@ -77,9 +77,24 @@ ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 echo "Checking if Lambda function exists..."
 if aws lambda get-function --function-name $FUNCTION_NAME --region $REGION > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Function exists. Updating code...${NC}"
+    
+    # Check if S3 bucket is set
+    if [ -z "$LEAVE_MGMT_S3_BUCKET" ]; then
+        echo -e "${RED}❌ Error: LEAVE_MGMT_S3_BUCKET not set${NC}"
+        echo "Please set it in your .env file"
+        exit 1
+    fi
+    
+    # Upload to S3 first (to avoid 50MB direct upload limit)
+    echo "Uploading package to S3..."
+    aws s3 cp $ZIP_FILE s3://${LEAVE_MGMT_S3_BUCKET}/lambda/$ZIP_FILE --region $REGION
+    
+    # Update from S3
+    echo "Updating Lambda function from S3..."
     aws lambda update-function-code \
         --function-name $FUNCTION_NAME \
-        --zip-file fileb://$ZIP_FILE \
+        --s3-bucket $LEAVE_MGMT_S3_BUCKET \
+        --s3-key lambda/$ZIP_FILE \
         --region $REGION > /dev/null
     
     echo "Waiting for update to complete..."
@@ -117,16 +132,34 @@ else
     
     echo "Using IAM role: $LAMBDA_ROLE"
     
-    # Create the function
+    # Check if S3 bucket is set
+    if [ -z "$LEAVE_MGMT_S3_BUCKET" ]; then
+        echo -e "${RED}❌ Error: LEAVE_MGMT_S3_BUCKET not set${NC}"
+        echo "Please set it in your .env file"
+        exit 1
+    fi
+    
+    # Upload to S3 first (to avoid 50MB direct upload limit)
+    echo "Uploading package to S3..."
+    aws s3 cp $ZIP_FILE s3://${LEAVE_MGMT_S3_BUCKET}/lambda/$ZIP_FILE --region $REGION
+    
+    # Build environment variables JSON
+    ENV_VARS="LEAVE_MGMT_S3_BUCKET=${LEAVE_MGMT_S3_BUCKET}"
+    if [ ! -z "$GEMINI_API_KEY" ]; then
+        ENV_VARS="${ENV_VARS},GEMINI_API_KEY=${GEMINI_API_KEY}"
+    fi
+    
+    # Create the function from S3
+    echo "Creating Lambda function from S3..."
     aws lambda create-function \
         --function-name $FUNCTION_NAME \
         --runtime python3.11 \
         --role $LAMBDA_ROLE \
         --handler agent.lambda_handler.lambda_handler \
-        --zip-file fileb://$ZIP_FILE \
+        --code S3Bucket=${LEAVE_MGMT_S3_BUCKET},S3Key=lambda/$ZIP_FILE \
         --timeout 60 \
         --memory-size 512 \
-        --environment Variables="{LEAVE_MGMT_S3_BUCKET=${LEAVE_MGMT_S3_BUCKET},GEMINI_API_KEY=${GEMINI_API_KEY}}" \
+        --environment "Variables={${ENV_VARS}}" \
         --region $REGION > /dev/null
     
     echo "Waiting for function to be active..."
