@@ -79,12 +79,26 @@ class GeminiLLM:
             },
         )
 
+        # Try to extract text from response
         text = getattr(response, "text", None)
         if isinstance(text, str) and text.strip():
             return text.strip()
+        
+        # Try to get text from candidates (even if MAX_TOKENS was hit)
+        try:
+            if hasattr(response, "candidates") and response.candidates:
+                candidate = response.candidates[0]
+                if hasattr(candidate, "content") and candidate.content:
+                    parts = getattr(candidate.content, "parts", [])
+                    if parts:
+                        part_text = getattr(parts[0], "text", None)
+                        if part_text:
+                            return part_text.strip()
+        except Exception:
+            pass
 
-        # Fallback: try to stringify the whole response
-        return str(response)
+        # Fallback: return a generic error message instead of dumping SDK response
+        return "I apologize, but I'm having trouble generating a response right now. Please try again."
 
     # The following helpers mirror the old SageMaker / AgentRouter interface
 
@@ -141,13 +155,13 @@ The JSON must contain: action, employee_id, and parameters."""
 
         system_prompt = """You are a helpful assistant for a leave management system.
 Generate clear, concise, and friendly responses to users about their leave requests and balances.
-Keep responses professional but conversational."""
+Keep responses professional but conversational. Be brief and to the point."""
 
         try:
             return self.invoke(
                 prompt,
                 temperature=0.4,
-                max_tokens=300,
+                max_tokens=800,  # Increased from 300 to avoid MAX_TOKENS
                 system_prompt=system_prompt,
             )
         except Exception as exc:
