@@ -12,6 +12,21 @@ echo -e "${BLUE}🔧 Setting up Lambda Function URL${NC}"
 echo "======================================"
 echo ""
 
+# Determine project root directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ -f "$SCRIPT_DIR/../.env" ]; then
+    PROJECT_ROOT="$SCRIPT_DIR/.."
+elif [ -f "$SCRIPT_DIR/.env" ]; then
+    PROJECT_ROOT="$SCRIPT_DIR"
+else
+    PROJECT_ROOT="."
+fi
+
+# Change to project root
+cd "$PROJECT_ROOT"
+echo -e "${GREEN}📁 Working directory: $(pwd)${NC}"
+echo ""
+
 # Load environment variables
 if [ -f .env ]; then
     export $(grep -v '^#' .env | xargs)

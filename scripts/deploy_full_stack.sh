@@ -13,6 +13,24 @@ echo -e "${BLUE}║   Leave Management System - Full Stack Deploy    ║${NC}"
 echo -e "${BLUE}╚═══════════════════════════════════════════════════╝${NC}"
 echo ""
 
+# Determine project root directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ -f "$SCRIPT_DIR/../.env" ]; then
+    PROJECT_ROOT="$SCRIPT_DIR/.."
+elif [ -f "$SCRIPT_DIR/.env" ]; then
+    PROJECT_ROOT="$SCRIPT_DIR"
+else
+    echo -e "${RED}❌ Error: .env file not found${NC}"
+    echo "Please create .env file in the project root with your configuration"
+    echo "Searched in: $SCRIPT_DIR and $SCRIPT_DIR/.."
+    exit 1
+fi
+
+# Change to project root
+cd "$PROJECT_ROOT"
+echo -e "${GREEN}📁 Working directory: $(pwd)${NC}"
+echo ""
+
 # Load environment variables
 if [ ! -f .env ]; then
     echo -e "${RED}❌ Error: .env file not found${NC}"

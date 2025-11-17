@@ -16,6 +16,23 @@ echo -e "${BLUE}🚀 Leave Management System - Frontend Deployment${NC}"
 echo "=================================================="
 echo ""
 
+# Determine project root directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ -d "$SCRIPT_DIR/../frontend" ]; then
+    PROJECT_ROOT="$SCRIPT_DIR/.."
+elif [ -d "$SCRIPT_DIR/frontend" ]; then
+    PROJECT_ROOT="$SCRIPT_DIR"
+else
+    echo -e "${RED}❌ Error: frontend directory not found${NC}"
+    echo "Please ensure you're running this from the project root or scripts directory"
+    exit 1
+fi
+
+# Change to project root
+cd "$PROJECT_ROOT"
+echo -e "${GREEN}📁 Working directory: $(pwd)${NC}"
+echo ""
+
 # Check if we're in the right directory
 if [ ! -d "frontend" ]; then
     echo -e "${RED}❌ Error: frontend directory not found${NC}"
