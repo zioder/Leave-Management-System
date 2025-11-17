@@ -29,11 +29,11 @@ def seed_engineers(storage, csv_path: Path) -> int:
     for _, row in df.iterrows():
         item = {
             "employee_id": str(row["employee_id"]),
-            "name": str(row["name"]),
-            "email": str(row["email"]),
             "department": str(row.get("department", "Engineering")),
-            "is_available": bool(row.get("is_available", True)),
-            "current_status": str(row.get("current_status", "available")),
+            "position": str(row.get("position", "Engineer")),
+            "status": str(row.get("status", "ACTIVE")),
+            "is_available": True if row.get("status") == "ACTIVE" else False,
+            "updated_at": str(row.get("updated_at", "")),
         }
         
         storage.put_item("EngineerAvailability", item)
@@ -50,12 +50,19 @@ def seed_leave_quotas(storage, csv_path: Path) -> int:
     
     count = 0
     for _, row in df.iterrows():
+        annual_allowance = int(row.get("annual_allowance", 20))
+        carried_over = int(row.get("carried_over", 0))
+        taken_to_date = int(row.get("taken_to_date", 0))
+        remaining = int(row.get("remaining_leaves", 0))
+        
         item = {
             "employee_id": str(row["employee_id"]),
-            "annual_quota": int(row.get("annual_quota", 20)),
-            "used_days": int(row.get("used_days", 0)),
-            "available_days": int(row.get("available_days", 20)),
-            "year": int(row.get("year", 2024)),
+            "annual_quota": annual_allowance,
+            "carried_over": carried_over,
+            "used_days": taken_to_date,
+            "available_days": remaining,
+            "year": 2024,
+            "updated_at": str(row.get("updated_at", "")),
         }
         
         storage.put_item("LeaveQuota", item)
@@ -74,18 +81,28 @@ def seed_leave_events(storage, csv_path: Path, limit: int = 100) -> int:
     df = df.head(limit)
     
     count = 0
+    processed_requests = set()
+    
     for _, row in df.iterrows():
-        # Generate a simple request_id
-        request_id = f"req-{row['employee_id']}-{row.get('start_date', count)}"
+        request_id = str(row.get("request_id", f"req-{count}"))
+        
+        # Skip duplicate request IDs (multiple events per request)
+        if request_id in processed_requests:
+            continue
+        
+        processed_requests.add(request_id)
         
         item = {
-            "request_id": request_id.replace(" ", "-").replace(":", "-"),
+            "request_id": request_id,
             "employee_id": str(row["employee_id"]),
+            "leave_type": str(row.get("leave_type", "Annual Leave")),
             "start_date": str(row.get("start_date", "")),
             "end_date": str(row.get("end_date", "")),
-            "leave_type": str(row.get("leave_type", "annual")),
-            "status": str(row.get("status", "pending")),
             "days_requested": int(row.get("days", 1)),
+            "event_type": str(row.get("event_type", "request_created")),
+            "status": str(row.get("status", "PENDING")),
+            "created_at": str(row.get("created_at", "")),
+            "approved_at": str(row.get("approved_at", "")),
         }
         
         storage.put_item("LeaveRequests", item)
