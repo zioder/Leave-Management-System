@@ -81,7 +81,6 @@ class GeminiLLM:
             config={
                 "temperature": temperature,
                 "max_output_tokens": max_tokens,
-                "thinking_level": "low",
             },
         )
 
