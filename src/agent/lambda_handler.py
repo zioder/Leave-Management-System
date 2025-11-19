@@ -6,7 +6,7 @@ from typing import Any, Dict
 
 import os
 from .service import handle_user_message
-from ..storage.s3_storage import S3Storage
+from ..storage.dynamodb_storage import create_storage
 
 
 def get_cors_headers():
@@ -22,8 +22,7 @@ def get_cors_headers():
 def get_employees_handler():
     """Handle GET /employees endpoint."""
     try:
-        bucket = os.environ.get("LEAVE_MGMT_S3_BUCKET", "")
-        storage = S3Storage(bucket)
+        storage = create_storage()
         employees = storage.scan("EngineerAvailability")
         
         # Limit to 30 engineers to reduce context size

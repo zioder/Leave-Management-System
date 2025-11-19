@@ -10,13 +10,13 @@ from typing import Any, Dict
 from datetime import datetime as dt
 import uuid
 
-from src.storage.s3_storage import S3Storage
+from ..storage.dynamodb_storage import DynamoDBStorage, create_storage
 
 # Gemini client (replaces SageMaker / AgentRouter usage)
 from .gemini_client import GeminiLLM
 
 
-def resolve_employee_name(storage: S3Storage, name_query: str) -> str | None:
+def resolve_employee_name(storage: Any, name_query: str) -> str | None:
     """
     Resolve a name query (e.g., 'Adam', 'adam solomon') to an employee_id.
     Returns the employee_id if found, None otherwise.
@@ -52,7 +52,7 @@ def resolve_employee_name(storage: S3Storage, name_query: str) -> str | None:
     return matches[0] if matches else None
 
 
-def query_balance(storage: S3Storage, employee_id: str) -> Dict[str, Any]:
+def query_balance(storage: Any, employee_id: str) -> Dict[str, Any]:
     """Query leave balance for an employee."""
     item = storage.get_item("LeaveQuota", {"employee_id": employee_id})
     if not item:
@@ -64,7 +64,7 @@ def query_balance(storage: S3Storage, employee_id: str) -> Dict[str, Any]:
     }
 
 
-def request_leave_direct(storage: S3Storage, payload: Dict[str, Any]) -> Dict[str, Any]:
+def request_leave_direct(storage: Any, payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     Process leave request directly in S3 (simplified version for AWS Academy).
     """
@@ -184,7 +184,7 @@ def request_leave_direct(storage: S3Storage, payload: Dict[str, Any]) -> Dict[st
     }
 
 
-def get_all_employees(storage: S3Storage, limit: int = 30) -> Dict[str, Any]:
+def get_all_employees(storage: Any, limit: int = 30) -> Dict[str, Any]:
     """Get all employees with their availability and quota info (admin only)."""
     engineers = storage.scan("EngineerAvailability")
     result = []
@@ -210,7 +210,7 @@ def get_all_employees(storage: S3Storage, limit: int = 30) -> Dict[str, Any]:
     }
 
 
-def get_availability_stats(storage: S3Storage) -> Dict[str, Any]:
+def get_availability_stats(storage: Any) -> Dict[str, Any]:
     """Get availability statistics (admin only)."""
     engineers = storage.scan("EngineerAvailability")
     total = len(engineers)
@@ -225,7 +225,7 @@ def get_availability_stats(storage: S3Storage) -> Dict[str, Any]:
     }
 
 
-def list_requests(storage: S3Storage, employee_id: str = None, is_admin: bool = False) -> Dict[str, Any]:
+def list_requests(storage: Any, employee_id: str = None, is_admin: bool = False) -> Dict[str, Any]:
     """List leave requests."""
     all_requests = storage.scan("LeaveRequests")
     
@@ -250,12 +250,8 @@ def handle_user_message(message: str, employee_id: str | None = None, is_admin: 
         employee_id: Selected employee ID (required for user mode, optional for admin)
         is_admin: Whether the user is an admin
     """
-    # Initialize S3 storage
-    bucket = os.environ.get("LEAVE_MGMT_S3_BUCKET", "")
-    if not bucket:
-        return {"error": "S3 bucket not configured", "command": {}, "data": {}}
-    
-    storage = S3Storage(bucket)
+    # Initialize Storage (DynamoDB)
+    storage = create_storage()
 
     # Always use Gemini as the LLM backend
     llm = GeminiLLM()

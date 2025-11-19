@@ -59,3 +59,4 @@ echo ""
 echo "🌐 Access your application at: http://${PUBLIC_IP}"
 echo ""
 
+

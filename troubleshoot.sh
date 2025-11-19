@@ -86,3 +86,4 @@ echo "If nginx is not running, there may be a build error."
 echo "Check the full log with:"
 echo "  ssh -i ~/.ssh/labsuser.pem ec2-user@${PUBLIC_IP} 'sudo cat /var/log/user-data.log'"
 
+

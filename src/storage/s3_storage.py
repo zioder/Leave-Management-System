@@ -209,3 +209,4 @@ def create_storage(bucket_name: str, region: str = "us-east-1") -> S3Storage:
     """Factory function to create storage instance."""
     return S3Storage(bucket_name=bucket_name, region=region)
 
+

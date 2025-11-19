@@ -27,18 +27,16 @@ function ChatBot({ isAdmin, employeeId }) {
   }, [messages]);
 
   useEffect(() => {
-    // Update welcome message when mode or employee changes
-    if (messages.length === 1) {
-      setMessages([{
-        text: isAdmin 
-          ? "Welcome, Admin! You can view all employees, check availability, and manage leave requests."
-          : employeeId 
-            ? `Hello! How can I help you with your leave management?`
-            : "Please select an employee to start chatting.",
-        sender: 'bot',
-        timestamp: new Date(),
-      }]);
-    }
+    // Reset conversation when mode or employee changes
+    setMessages([{
+      text: isAdmin 
+        ? "Welcome, Admin! You can view all employees, check availability, and manage leave requests."
+        : employeeId 
+          ? `Hello! How can I help you with your leave management?`
+          : "Please select an employee to start chatting.",
+      sender: 'bot',
+      timestamp: new Date(),
+    }]);
   }, [isAdmin, employeeId]);
 
   const handleSend = async (e) => {

@@ -6,60 +6,88 @@
 
 .mode-selector {
   display: flex;
-  gap: 20px;
+  gap: 25px;
+  background: rgba(0, 0, 0, 0.1);
+  padding: 10px 20px;
+  border-radius: 30px;
+  width: fit-content;
 }
 
 .mode-selector label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.mode-selector label:hover {
+  opacity: 0.8;
 }
 
 .mode-selector input[type="radio"] {
   cursor: pointer;
+  accent-color: #fff; /* Modern accent color for radio */
+  width: 18px;
+  height: 18px;
 }
 
 .employee-selector {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 15px;
 }
 
 .employee-selector label {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .employee-dropdown {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
   font-size: 14px;
-  background: white;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
   cursor: pointer;
-  min-width: 250px;
+  min-width: 280px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  appearance: none; /* Remove default arrow on some browsers to style custom if needed, but standard is okay for now */
+}
+
+/* Dropdown options usually render in a separate layer by the OS/Browser, so background color here matters for the select element itself */
+.employee-dropdown option {
+  background: #333; /* Solid dark background for options for readability */
+  color: white;
 }
 
 .employee-dropdown:hover {
-  border-color: #007bff;
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .employee-dropdown:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+  border-color: white;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
 }
 
 .admin-badge {
-  display: inline-block;
-  background-color: #28a745;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(40, 167, 69, 0.25);
+  color: #aefcd1;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(4px);
 }
-
-

@@ -61,3 +61,4 @@ aws ec2 describe-instances \
 echo ""
 echo "✅ Diagnosis complete!"
 
+
