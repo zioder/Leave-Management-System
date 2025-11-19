@@ -406,6 +406,15 @@ def handle_user_message(message: str, employee_id: str | None = None, is_admin: 
             # Update the command with resolved ID
             command["employee_id"] = resolved_id
     
+    # Handle error action from LLM parsing failure
+    if action == "error":
+        error_msg = command.get("parameters", {}).get("error", "An error occurred")
+        return {
+            "command": command,
+            "data": {"status": "ERROR", "error": error_msg},
+            "message": error_msg
+        }
+    
     # Admin-specific actions
     if is_admin and action == "get_all_employees":
         data = get_all_employees(storage)
@@ -461,7 +470,11 @@ def handle_user_message(message: str, employee_id: str | None = None, is_admin: 
 
 def generate_simple_narrative(action: str, data: Dict[str, Any], is_admin: bool = False) -> str:
     """Generate a simple text narrative when Gemini fails."""
-    if action == "query_balance":
+    if action == "error":
+        error_msg = data.get("error", "An error occurred processing your request.")
+        return f"I'm sorry, I couldn't understand your request. {error_msg}\n\nPlease try:\n- Using clear date formats like '2025-11-20' or 'November 20, 2025'\n- Being specific about the action (e.g., 'request leave', 'check balance', 'who is on leave')\n- Breaking complex requests into smaller parts"
+    
+    elif action == "query_balance":
         avail = data.get("available_days", 0)
         taken = data.get("taken_ytd", 0)
         if is_admin:

@@ -50,12 +50,16 @@ def command_prompt(user_message: str) -> str:
         - check_availability_for_date: Check who is on leave for a specific date or date range. Requires start_date (and optional end_date).
 
         Date handling:
-        - Convert relative dates to ISO 8601 (YYYY-MM-DD)
+        - Convert ALL dates to ISO 8601 format (YYYY-MM-DD)
+        - Handle date formats: "20/11", "20/11/2025", "Nov 20", "20-11-2025" → convert to "2025-11-20"
+        - Assume current year (2025) if year not specified
+        - Assume MM/DD format for slash dates (US format)
         - "tomorrow" = today + 1 day
         - "next Monday" = calculate next Monday's date
         - "from tomorrow for 2 days" = tomorrow as start_date, tomorrow+1 as end_date
         - "2 days from tomorrow" = tomorrow as start_date, tomorrow+1 as end_date
         - "2 days starting tomorrow" = tomorrow as start_date, tomorrow+1 as end_date
+        - "3 days from 20/11 to 22/11" = start_date: "2025-11-20", end_date: "2025-11-22"
         - If only days mentioned (e.g., "5 days"), use "days": 5, omit dates
         - Always calculate actual dates when possible
 

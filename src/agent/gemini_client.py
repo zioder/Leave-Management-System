@@ -135,35 +135,95 @@ class GeminiLLM:
         prompt = command_prompt(user_message)
 
         system_prompt = """You are a helpful assistant that parses user requests into structured JSON commands.
-Always respond with valid JSON only, no additional text.
-The JSON must contain: action, employee_id, and parameters."""
+CRITICAL: Respond with ONLY valid JSON. No explanations, no markdown, no extra text.
+The JSON must contain: action, employee_id, and parameters.
+Use double quotes for all strings. Escape any quotes inside strings.
+Example valid response: {"action": "query_balance", "employee_id": "john-doe", "parameters": {}}"""
 
-        try:
-            raw = self.invoke(
-                prompt,
-                temperature=0.1,
-                max_tokens=256,
-                system_prompt=system_prompt,
-            )
+        # Try up to 2 times to get valid JSON
+        for attempt in range(2):
+            try:
+                raw = self.invoke(
+                    prompt,
+                    temperature=0.05 if attempt == 1 else 0.1,  # Lower temp on retry
+                    max_tokens=256,
+                    system_prompt=system_prompt,
+                )
 
-            # Robustly extract JSON from the response
-            match = re.search(r"\{[\s\S]*\}", raw)
-            if match:
-                json_str = match.group(0)
-                return json.loads(json_str)
-            
-            # Fallback: try to parse the whole string if no braces found (unlikely)
-            return json.loads(raw.strip())
-        except Exception as exc:
-            # Fall back to a simple error command; the service layer will still
-            # return something sensible to the user.
-            return {
-                "action": "error",
-                "employee_id": None,
-                "parameters": {
-                    "error": f"Failed to parse command with Gemini: {exc}",
-                },
-            }
+                # Robustly extract JSON from the response
+                match = re.search(r"\{[\s\S]*\}", raw)
+                if match:
+                    json_str = match.group(0)
+                    # Clean up common JSON issues
+                    json_str = self._clean_json(json_str)
+                    return json.loads(json_str)
+                
+                # Fallback: try to parse the whole string if no braces found (unlikely)
+                cleaned = self._clean_json(raw.strip())
+                return json.loads(cleaned)
+                
+            except json.JSONDecodeError as exc:
+                # On first attempt failure, log and retry
+                if attempt == 0:
+                    print(f"JSON parse failed on attempt {attempt + 1}: {exc}. Retrying...")
+                    continue
+                    
+                # Final attempt failed - provide a helpful error
+                print(f"Final JSON parse attempt failed: {exc}")
+                print(f"Raw response: {raw[:200]}")  # Log first 200 chars for debugging
+                return {
+                    "action": "error",
+                    "employee_id": None,
+                    "parameters": {
+                        "error": "I had trouble understanding your request. Please try rephrasing it more clearly.",
+                    },
+                }
+            except Exception as exc:
+                # Other errors
+                print(f"Unexpected error in command parsing: {exc}")
+                return {
+                    "action": "error",
+                    "employee_id": None,
+                    "parameters": {
+                        "error": "An unexpected error occurred. Please try again.",
+                    },
+                }
+        
+        # Should never reach here, but just in case
+        return {
+            "action": "error",
+            "employee_id": None,
+            "parameters": {
+                "error": "Failed to process your request after multiple attempts.",
+            },
+        }
+    
+    def _clean_json(self, json_str: str) -> str:
+        """Clean common JSON formatting issues."""
+        # Remove any markdown code block markers
+        json_str = re.sub(r'```json\s*', '', json_str)
+        json_str = re.sub(r'```\s*$', '', json_str)
+        json_str = json_str.strip()
+        
+        # Remove trailing commas before closing braces/brackets
+        json_str = re.sub(r',\s*}', '}', json_str)
+        json_str = re.sub(r',\s*]', ']', json_str)
+        
+        # Fix common string termination issues
+        # If there's an unterminated string, try to find and fix it
+        lines = json_str.split('\n')
+        fixed_lines = []
+        for line in lines:
+            # Check if line has unbalanced quotes
+            quote_count = line.count('"') - line.count('\\"')
+            if quote_count % 2 != 0 and not line.strip().endswith('"'):
+                # Try to add closing quote before comma or brace
+                if ',' in line or '}' in line:
+                    line = re.sub(r'([^"]),', r'\1",', line)
+                    line = re.sub(r'([^"])}', r'\1"}', line)
+            fixed_lines.append(line)
+        
+        return '\n'.join(fixed_lines)
 
     def narrative(self, command: Dict[str, Any], data_payload: Dict[str, Any], is_admin: bool = False) -> str:
         """
