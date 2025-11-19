@@ -20,7 +20,12 @@ from typing import Any, Dict
 
 from google import genai
 
-from .prompt_builder import command_prompt, narrative_prompt
+# Try relative imports first (for local dev), then absolute imports (for Lambda)
+try:
+    from .prompt_builder import command_prompt, narrative_prompt
+except ImportError:
+    # Absolute imports for Lambda deployment
+    from prompt_builder import command_prompt, narrative_prompt
 
 
 class GeminiLLM:

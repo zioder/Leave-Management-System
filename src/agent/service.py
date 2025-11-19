@@ -10,10 +10,14 @@ from typing import Any, Dict
 from datetime import datetime as dt
 import uuid
 
-from ..storage.dynamodb_storage import DynamoDBStorage, create_storage
-
-# Gemini client (replaces SageMaker / AgentRouter usage)
-from .gemini_client import GeminiLLM
+# Try relative imports first (for local dev), then absolute imports (for Lambda)
+try:
+    from ..storage.dynamodb_storage import DynamoDBStorage, create_storage
+    from .gemini_client import GeminiLLM
+except ImportError:
+    # Absolute imports for Lambda deployment
+    from storage.dynamodb_storage import DynamoDBStorage, create_storage
+    from gemini_client import GeminiLLM
 
 
 def resolve_employee_name(storage: Any, name_query: str) -> str | None:

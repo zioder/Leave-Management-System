@@ -3,10 +3,16 @@ from __future__ import annotations
 
 import json
 from typing import Any, Dict
-
 import os
-from .service import handle_user_message
-from ..storage.dynamodb_storage import create_storage
+
+# Try relative imports first (for local dev), then absolute imports (for Lambda)
+try:
+    from .service import handle_user_message
+    from ..storage.dynamodb_storage import create_storage
+except ImportError:
+    # Absolute imports for Lambda deployment
+    from service import handle_user_message
+    from storage.dynamodb_storage import create_storage
 
 
 def get_cors_headers():
