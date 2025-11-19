@@ -28,7 +28,8 @@ def command_prompt(user_message: str) -> str:
     template = dedent(
         f"""
         You are a leave-management assistant. Translate the user request into a JSON command.
-        Schema:
+        
+        Schema for VALID requests:
         {{{{
           "action": {actions},
           "employee_id": "string (required for user actions, optional for admin)",
@@ -40,15 +41,24 @@ def command_prompt(user_message: str) -> str:
           }}}}
         }}}}
 
+        Schema for IMPOSSIBLE/AMBIGUOUS requests:
+        {{{{
+          "action": "error",
+          "employee_id": "string (optional)",
+          "parameters": {{{{
+             "error": "string (explanation of why the request cannot be processed)"
+          }}}}
+        }}}}
+
         Available actions:
         - query_balance: Get employee's remaining leave days
         - request_leave: Request leave for an employee
-        - cancel_leave: Cancel an existing leave request. Identify the request by its start_date in parameters.
-        - list_requests: List leave requests for an employee
-        - get_all_employees: Get all employees with their status (admin only). Use this to see who is currently on leave.
+        - cancel_leave: Cancel an existing leave request. 'start_date' is optional if the employee has only one active leave.
+        - list_requests: List leave requests. Admin: lists all (or filtered by employee_id). User: lists their own.
+        - get_all_employees: Get all employees with their status (admin only). Use this for "Who is on leave?", "Show all employees".
         - get_availability_stats: Get availability statistics (admin only)
-        - check_availability_for_date: Check who is on leave for a specific date or date range. Requires start_date (and optional end_date).
-
+        - check_availability_for_date: Check who is on leave for a specific date or date range.
+        
         Date handling:
         - Convert ALL dates to ISO 8601 format (YYYY-MM-DD)
         - Handle date formats: "20/11", "20/11/2025", "Nov 20", "20-11-2025" → convert to "2025-11-20"
@@ -63,9 +73,8 @@ def command_prompt(user_message: str) -> str:
         - If only days mentioned (e.g., "5 days"), use "days": 5, omit dates
         - Always calculate actual dates when possible
 
-        Constraints:
+        Constraints & Rules:
         - There are 30 engineers total; at least 20 must remain available.
-        - Reject impossible requests by setting "action": "error" with explanation.
         - Dates must be ISO 8601 format (YYYY-MM-DD).
         - Omit optional parameters when not provided.{admin_note}
         - Extract employee_id from the message if present, otherwise use the one from context.
@@ -73,9 +82,19 @@ def command_prompt(user_message: str) -> str:
         - Employee IDs are in format "firstname-lastname" (e.g., "adam-solomon").
         - When user mentions just a first name (e.g., "Adam"), extract it as employee_id: "adam" (lowercase).
         - The backend will resolve partial names to full employee IDs.
+        - "Who has leave requests?" -> list_requests
+        - "Who is on leave?" -> get_all_employees (or check_availability_for_date if date specified)
+        - "active leave requests" -> list_requests
+
+        Examples:
+        1. User: "cancel robert jones leave"
+           Output: {{{{ "action": "cancel_leave", "employee_id": "robert-jones", "parameters": {{{{}}}} }}}}
+        
+        2. User: "Who has leave requests?" (Admin)
+           Output: {{{{ "action": "list_requests", "employee_id": null, "parameters": {{{{}}}} }}}}
 
         Output ONLY minified JSON, nothing else.
-
+        
         User: {{message}}
         """
     )

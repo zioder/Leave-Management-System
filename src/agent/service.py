@@ -199,21 +199,40 @@ def cancel_leave_request(storage: Any, payload: Dict[str, Any]) -> Dict[str, Any
     parameters = payload.get("parameters", {})
     start_date = parameters.get("start_date")
     
+    # If no start date provided, try to infer it
     if not start_date:
-         return {"status": "ERROR", "error": "Please specify the start date of the leave you want to cancel."}
-
-    # Find the request
-    # In a real DB we would query by employee_id and start_date, or use request_id directly.
-    # Here we scan and filter (inefficient but functional for this demo).
-    all_requests = storage.scan("LeaveRequests")
-    target_request = None
-    
-    for req in all_requests:
-        if (req.get("employee_id") == employee_id and 
-            req.get("start_date") == start_date and 
-            req.get("status") == "APPROVED"):
-            target_request = req
-            break
+        # Find all active approved requests for this employee
+        all_requests = storage.scan("LeaveRequests")
+        active_requests = []
+        for req in all_requests:
+            if (req.get("employee_id") == employee_id and 
+                req.get("status") == "APPROVED"):
+                active_requests.append(req)
+        
+        if len(active_requests) == 0:
+            return {"status": "NOT_FOUND", "error": f"No active approved leave requests found for {employee_id}."}
+        elif len(active_requests) == 1:
+            # Auto-select the only active request
+            target_request = active_requests[0]
+            start_date = target_request.get("start_date")
+        else:
+            # Multiple requests found, ask for clarification
+            dates = [r.get("start_date") for r in active_requests]
+            return {
+                "status": "ERROR", 
+                "error": f"Found multiple active leave requests starting on: {', '.join(dates)}. Please specify which date you want to cancel."
+            }
+    else:
+        # Find the request with the specific start date
+        all_requests = storage.scan("LeaveRequests")
+        target_request = None
+        
+        for req in all_requests:
+            if (req.get("employee_id") == employee_id and 
+                req.get("start_date") == start_date and 
+                req.get("status") == "APPROVED"):
+                target_request = req
+                break
     
     if not target_request:
         return {"status": "NOT_FOUND", "error": f"No active approved leave found starting on {start_date}."}
