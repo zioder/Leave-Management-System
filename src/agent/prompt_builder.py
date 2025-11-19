@@ -19,10 +19,10 @@ def command_prompt(user_message: str) -> str:
     today = datetime.now().strftime("%Y-%m-%d")
     
     if is_admin:
-        actions = '"query_balance" | "request_leave" | "list_requests" | "get_all_employees" | "get_availability_stats"'
+        actions = '"query_balance" | "request_leave" | "cancel_leave" | "list_requests" | "get_all_employees" | "get_availability_stats" | "check_availability_for_date"'
         admin_note = "\n        - Admin mode: You can query all employees, view availability stats, and manage any employee's leave."
     else:
-        actions = '"query_balance" | "request_leave" | "list_requests"'
+        actions = '"query_balance" | "request_leave" | "cancel_leave" | "list_requests" | "check_availability_for_date"'
         admin_note = ""
     
     template = dedent(
@@ -33,8 +33,8 @@ def command_prompt(user_message: str) -> str:
           "action": {actions},
           "employee_id": "string (required for user actions, optional for admin)",
           "parameters": {{{{
-             "start_date": "YYYY-MM-DD (optional, for leave requests)",
-             "end_date": "YYYY-MM-DD (optional, for leave requests)",
+             "start_date": "YYYY-MM-DD (optional, for leave requests, cancellation, or availability check)",
+             "end_date": "YYYY-MM-DD (optional, for leave requests or availability check)",
              "leave_type": "string (optional, e.g., 'Sick Leave', 'Vacation')",
              "days": "integer (optional, calculated from dates if not provided)"
           }}}}
@@ -43,9 +43,11 @@ def command_prompt(user_message: str) -> str:
         Available actions:
         - query_balance: Get employee's remaining leave days
         - request_leave: Request leave for an employee
+        - cancel_leave: Cancel an existing leave request. Identify the request by its start_date in parameters.
         - list_requests: List leave requests for an employee
-        - get_all_employees: Get all employees with their status (admin only)
+        - get_all_employees: Get all employees with their status (admin only). Use this to see who is currently on leave.
         - get_availability_stats: Get availability statistics (admin only)
+        - check_availability_for_date: Check who is on leave for a specific date or date range. Requires start_date (and optional end_date).
 
         Date handling:
         - Convert relative dates to ISO 8601 (YYYY-MM-DD)
@@ -88,6 +90,7 @@ def narrative_prompt(command: Dict, data_payload: Dict) -> str:
         {data}
 
         Compose a short friendly paragraph describing the outcome for the engineer.
+        If listing requests, include specific dates, leave types, and statuses.
         Mention remaining balance or denial reasons. Keep it under 100 words.
         """
     )

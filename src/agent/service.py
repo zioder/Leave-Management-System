@@ -184,6 +184,127 @@ def request_leave_direct(storage: Any, payload: Dict[str, Any]) -> Dict[str, Any
     }
 
 
+def cancel_leave_request(storage: Any, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Cancel an existing leave request.
+    """
+    employee_id = payload.get("employee_id")
+    if not employee_id:
+        return {"status": "ERROR", "error": "Employee ID is required"}
+    
+    parameters = payload.get("parameters", {})
+    start_date = parameters.get("start_date")
+    
+    if not start_date:
+         return {"status": "ERROR", "error": "Please specify the start date of the leave you want to cancel."}
+
+    # Find the request
+    # In a real DB we would query by employee_id and start_date, or use request_id directly.
+    # Here we scan and filter (inefficient but functional for this demo).
+    all_requests = storage.scan("LeaveRequests")
+    target_request = None
+    
+    for req in all_requests:
+        if (req.get("employee_id") == employee_id and 
+            req.get("start_date") == start_date and 
+            req.get("status") == "APPROVED"):
+            target_request = req
+            break
+    
+    if not target_request:
+        return {"status": "NOT_FOUND", "error": f"No active approved leave found starting on {start_date}."}
+    
+    # Refund days
+    days = float(target_request.get("days", 0))
+    quota_item = storage.get_item("LeaveQuota", {"employee_id": employee_id})
+    if quota_item:
+        quota_item["taken_ytd"] = float(quota_item.get("taken_ytd", 0)) - days
+        quota_item["available_days"] = float(quota_item.get("available_days", 0)) + days
+        storage.put_item("LeaveQuota", quota_item)
+    
+    # Update Engineer Availability if they are currently ON_LEAVE for this request
+    # (Simplified check: if they are ON_LEAVE and the dates match)
+    engineer_item = storage.get_item("EngineerAvailability", {"employee_id": employee_id})
+    if engineer_item and engineer_item.get("current_status") == "ON_LEAVE":
+        # Only reset if the leave dates match (approximate check)
+        if engineer_item.get("on_leave_from") == start_date:
+            engineer_item.update({
+                "current_status": "AVAILABLE",
+                "on_leave_from": None,
+                "on_leave_to": None,
+            })
+            storage.put_item("EngineerAvailability", engineer_item)
+            
+    # Update request status
+    target_request["status"] = "CANCELLED"
+    storage.put_item("LeaveRequests", target_request)
+    
+    return {
+        "status": "CANCELLED", 
+        "message": f"Leave request for {start_date} has been cancelled. {days} days have been refunded to your balance."
+    }
+
+
+def check_availability_for_date(storage: Any, payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Check who is on leave for a specific date or range.
+    """
+    parameters = payload.get("parameters", {})
+    start_date = parameters.get("start_date")
+    end_date = parameters.get("end_date") or start_date
+    
+    if not start_date:
+        return {"status": "ERROR", "error": "Please specify a date to check availability for."}
+        
+    # Convert strings to date objects for comparison
+    try:
+        check_start = dt.strptime(start_date, "%Y-%m-%d")
+        check_end = dt.strptime(end_date, "%Y-%m-%d")
+    except ValueError:
+        return {"status": "ERROR", "error": "Invalid date format. Use YYYY-MM-DD."}
+
+    all_requests = storage.scan("LeaveRequests")
+    on_leave = []
+    
+    for req in all_requests:
+        if req.get("status") != "APPROVED":
+            continue
+            
+        req_start_str = req.get("start_date")
+        req_end_str = req.get("end_date")
+        
+        if not req_start_str or not req_end_str:
+            continue
+            
+        try:
+            req_start = dt.strptime(req_start_str, "%Y-%m-%d")
+            req_end = dt.strptime(req_end_str, "%Y-%m-%d")
+            
+            # Check for overlap
+            # Overlap occurs if (StartA <= EndB) and (EndA >= StartB)
+            if req_start <= check_end and req_end >= check_start:
+                on_leave.append({
+                    "employee_id": req.get("employee_id"),
+                    "leave_type": req.get("leave_type"),
+                    "start_date": req_start_str,
+                    "end_date": req_end_str
+                })
+        except ValueError:
+            continue
+            
+    total_engineers = 30  # Hardcoded for this demo, or query from DB
+    available_count = total_engineers - len(on_leave)
+    
+    return {
+        "status": "OK",
+        "check_date": start_date,
+        "check_end_date": end_date,
+        "on_leave_count": len(on_leave),
+        "available_count": available_count,
+        "on_leave_employees": on_leave
+    }
+
+
 def get_all_employees(storage: Any, limit: int = 30) -> Dict[str, Any]:
     """Get all employees with their availability and quota info (admin only)."""
     engineers = storage.scan("EngineerAvailability")
@@ -294,6 +415,12 @@ def handle_user_message(message: str, employee_id: str | None = None, is_admin: 
         if not cmd_employee_id:
             return {"error": "Employee ID is required", "command": command, "data": {}}
         data = request_leave_direct(storage, command)
+    elif action == "cancel_leave":
+        if not cmd_employee_id:
+            return {"error": "Employee ID is required", "command": command, "data": {}}
+        data = cancel_leave_request(storage, command)
+    elif action == "check_availability_for_date":
+        data = check_availability_for_date(storage, command)
     elif action == "list_requests":
         data = list_requests(storage, cmd_employee_id, is_admin)
     else:
@@ -302,12 +429,16 @@ def handle_user_message(message: str, employee_id: str | None = None, is_admin: 
     # Create a simplified version for narrative (avoid context overflow)
     narrative_data = data.copy()
     if action == "get_all_employees" and "employees" in narrative_data:
-        # Only send summary stats for narrative, not full employee list
+        # Prepare a summary for the narrative, highlighting those on leave
+        all_emps = narrative_data.get("employees", [])
+        on_leave_emps = [e.get("employee_id") for e in all_emps if e.get("status") == "ON_LEAVE"]
+        
         narrative_data = {
             "status": narrative_data.get("status"),
             "total": narrative_data.get("total"),
-            "showing": narrative_data.get("showing"),
-            "sample_count": min(5, len(narrative_data.get("employees", [])))
+            "on_leave_count": len(on_leave_emps),
+            "on_leave_employees": on_leave_emps,
+            "sample_available": [e.get("employee_id") for e in all_emps[:5] if e.get("status") == "AVAILABLE"]
         }
     
     # Generate narrative with fallback
@@ -348,6 +479,22 @@ def generate_simple_narrative(action: str, data: Dict[str, Any], is_admin: bool 
             return f"❌ Your leave request was denied. {data.get('reason', '')}"
         else:
             return f"Leave request status: {status}"
+            
+    elif action == "cancel_leave":
+        if data.get("status") == "CANCELLED":
+            return f"✅ {data.get('message')}"
+        else:
+            return f"❌ Could not cancel leave: {data.get('error', 'Unknown error')}"
+
+    elif action == "check_availability_for_date":
+        count = data.get("on_leave_count", 0)
+        avail = data.get("available_count", 0)
+        date = data.get("check_date")
+        if count == 0:
+            return f"Good news! The entire team ({avail} engineers) is available on {date}."
+        else:
+            emps = [e['employee_id'] for e in data.get('on_leave_employees', [])]
+            return f"On {date}, {count} engineer(s) are on leave: {', '.join(emps)}. {avail} engineers are available."
     
     elif action == "get_all_employees":
         total = data.get("total", 0)
@@ -356,7 +503,17 @@ def generate_simple_narrative(action: str, data: Dict[str, Any], is_admin: bool 
     
     elif action == "list_requests":
         requests = data.get("requests", [])
-        return f"Found {len(requests)} leave requests."
+        if not requests:
+            return "No leave requests found."
+        
+        details = []
+        for r in requests[:3]:  # Show first 3
+            details.append(f"{r.get('leave_type', 'Leave')} ({r.get('status', 'PENDING')}) from {r.get('start_date')} to {r.get('end_date')}")
+        
+        msg = f"Found {len(requests)} leave requests: " + "; ".join(details)
+        if len(requests) > 3:
+            msg += f", and {len(requests) - 3} more."
+        return msg
     
     else:
         return "Request processed successfully."

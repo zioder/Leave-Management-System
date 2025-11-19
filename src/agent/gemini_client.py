@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from typing import Any, Dict
 
 from google import genai
@@ -141,17 +142,14 @@ The JSON must contain: action, employee_id, and parameters."""
                 system_prompt=system_prompt,
             )
 
-            # Remove any stray markdown fences
-            response = raw.strip()
-            if response.startswith("```json"):
-                response = response[7:]
-            elif response.startswith("```"):
-                response = response[3:]
-            if response.endswith("```"):
-                response = response[:-3]
-
-            response = response.strip()
-            return json.loads(response)
+            # Robustly extract JSON from the response
+            match = re.search(r"\{[\s\S]*\}", raw)
+            if match:
+                json_str = match.group(0)
+                return json.loads(json_str)
+            
+            # Fallback: try to parse the whole string if no braces found (unlikely)
+            return json.loads(raw.strip())
         except Exception as exc:
             # Fall back to a simple error command; the service layer will still
             # return something sensible to the user.

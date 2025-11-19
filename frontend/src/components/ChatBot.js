@@ -17,6 +17,8 @@ function ChatBot({ isAdmin, employeeId }) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  // Track the employee ID from conversation context (for follow-up questions)
+  const [contextEmployeeId, setContextEmployeeId] = useState(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -37,6 +39,7 @@ function ChatBot({ isAdmin, employeeId }) {
       sender: 'bot',
       timestamp: new Date(),
     }]);
+    setContextEmployeeId(null);
   }, [isAdmin, employeeId]);
 
   const handleSend = async (e) => {
@@ -65,7 +68,15 @@ function ChatBot({ isAdmin, employeeId }) {
     setIsLoading(true);
 
     try {
-      const response = await sendMessage(input, employeeId, isAdmin);
+      // Use context ID if available (supports follow-up questions), otherwise fallback to selected employee
+      const activeEmployeeId = isAdmin ? (contextEmployeeId || employeeId) : employeeId;
+      const response = await sendMessage(input, activeEmployeeId, isAdmin);
+      
+      // Update context if we're in admin mode and an employee was identified
+      if (isAdmin && response.command && response.command.employee_id) {
+        setContextEmployeeId(response.command.employee_id);
+      }
+
       const botMessage = {
         text: response.message || response.error || 'Sorry, I could not process your request.',
         sender: 'bot',
