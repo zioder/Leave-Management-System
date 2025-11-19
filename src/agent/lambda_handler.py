@@ -15,12 +15,9 @@ except ImportError:
     from storage.dynamodb_storage import create_storage
 
 
-def get_cors_headers():
-    """Return CORS headers for all responses."""
+def get_headers():
+    """Return headers for responses (NO CORS headers to avoid duplication)."""
     return {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
         "Content-Type": "application/json"
     }
 
@@ -52,13 +49,13 @@ def get_employees_handler():
         
         return {
             "statusCode": 200,
-            "headers": get_cors_headers(),
+            "headers": get_headers(),
             "body": json.dumps({"employees": employees_list})
         }
     except Exception as e:
         return {
             "statusCode": 500,
-            "headers": get_cors_headers(),
+            "headers": get_headers(),
             "body": json.dumps({"error": f"Failed to fetch employees: {str(e)}"})
         }
 
@@ -69,7 +66,7 @@ def chat_handler(payload: Dict[str, Any]):
     if not message:
         return {
             "statusCode": 400,
-            "headers": get_cors_headers(),
+            "headers": get_headers(),
             "body": json.dumps({"error": "Missing 'message'"}),
         }
     
@@ -80,71 +77,74 @@ def chat_handler(payload: Dict[str, Any]):
         result = handle_user_message(message, employee_id=employee_id, is_admin=is_admin)
         return {
             "statusCode": 200,
-            "headers": get_cors_headers(),
+            "headers": get_headers(),
             "body": json.dumps(result),
         }
     except Exception as e:
         return {
             "statusCode": 500,
-            "headers": get_cors_headers(),
+            "headers": get_headers(),
             "body": json.dumps({"error": str(e)}),
         }
 
 
-def lambda_handler(event: Dict[str, Any], _context) -> Dict[str, Any]:
-    """
-    Lambda handler for chatbot API.
-    Supports both API Gateway and Lambda Function URL formats.
-    
-    Routes:
-    - GET /employees - List all employees
-    - POST /chat - Send message to chatbot
-    
-    Expected payload for /chat:
-    {
-        "message": "User's message",
-        "employee_id": "optional-employee-id",
-        "is_admin": false
-    }
-    """
-    # Extract HTTP method and path (works for both API Gateway and Function URLs)
-    http_method = event.get("requestContext", {}).get("http", {}).get("method") or event.get("httpMethod", "POST")
-    raw_path = event.get("requestContext", {}).get("http", {}).get("path") or event.get("path", "")
-    
-    # Handle CORS preflight
-    if http_method == "OPTIONS":
-        return {
-            "statusCode": 200,
-            "headers": get_cors_headers(),
-            "body": ""
-        }
-    
-    # Route: GET /employees
-    if http_method == "GET" and ("employee" in raw_path.lower() or raw_path == "/"):
-        return get_employees_handler()
-    
-    # Route: POST /chat or POST / (default)
-    if http_method == "POST":
-        # Parse request body
-        if "body" in event:
+def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
+    """Lambda function handler."""
+    try:
+        # Extract HTTP method
+        http_method = event.get("requestContext", {}).get("http", {}).get("method") or event.get("httpMethod", "POST")
+        raw_path = event.get("requestContext", {}).get("http", {}).get("path") or event.get("path", "")
+
+        # Handle OPTIONS for CORS preflight (return 200, Function URL adds headers)
+        if http_method == "OPTIONS":
+            return {
+                "statusCode": 200,
+                "body": "OK"
+            }
+
+        # Route: GET /employees
+        if http_method == "GET" and ("employee" in raw_path.lower() or raw_path == "/"):
+            return get_employees_handler()
+
+        # Parse request body for POST
+        body = event.get("body", "{}")
+        if isinstance(body, str):
             try:
-                payload = json.loads(event["body"])
+                body = json.loads(body)
             except json.JSONDecodeError:
-                return {
-                    "statusCode": 400,
-                    "headers": get_cors_headers(),
-                    "body": json.dumps({"error": "Invalid JSON body"}),
-                }
-        else:
-            payload = event
+                pass # keep as is or empty dict
+
+        # If body is empty but it's a POST, check if it's in the event root
+        if not body and http_method == "POST":
+             body = event
+
+        message = body.get("message")
         
-        return chat_handler(payload)
-    
-    # Unknown route
-    return {
-        "statusCode": 404,
-        "headers": get_cors_headers(),
-        "body": json.dumps({"error": f"Route not found: {http_method} {raw_path}"})
-    }
+        # If we have a message, it's a chat request
+        if message:
+            return chat_handler(body)
+            
+        # Default to chat handler if it looks like a payload
+        if "is_admin" in body or "employee_id" in body:
+            return chat_handler(body)
+            
+        # Unknown route/method
+        return {
+            "statusCode": 404,
+            "headers": get_headers(),
+            "body": json.dumps({"error": "Route not found"})
+        }
 
-
+    except Exception as e:
+        print(f"Error in lambda_handler: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        return {
+            "statusCode": 500,
+            "headers": get_headers(),
+            "body": json.dumps({
+                "error": str(e),
+                "message": "Internal server error"
+            })
+        }
