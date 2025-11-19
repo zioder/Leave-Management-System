@@ -16,9 +16,12 @@ except ImportError:
 
 
 def get_headers():
-    """Return headers for responses (NO CORS headers to avoid duplication)."""
+    """Return headers for responses (with CORS since Function URL CORS is disabled)."""
     return {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With"
     }
 
 
@@ -95,10 +98,11 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         http_method = event.get("requestContext", {}).get("http", {}).get("method") or event.get("httpMethod", "POST")
         raw_path = event.get("requestContext", {}).get("http", {}).get("path") or event.get("path", "")
 
-        # Handle OPTIONS for CORS preflight (return 200, Function URL adds headers)
+        # Handle OPTIONS for CORS preflight
         if http_method == "OPTIONS":
             return {
                 "statusCode": 200,
+                "headers": get_headers(),
                 "body": "OK"
             }
 
